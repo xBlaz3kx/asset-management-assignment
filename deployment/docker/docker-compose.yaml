@@ -1,0 +1,146 @@
+services:
+
+  simulator:
+    hostname: simulator
+    restart: unless-stopped
+    build:
+      context: ../../
+      dockerfile: ./build/simulator/Dockerfile
+    labels:
+      - traefik.enable=true
+      - traefik.tags=public
+      - traefik.http.services.simulator.loadbalancer.server.port=80
+      - traefik.http.routers.simulator.rule=Host(`simulator.${DOMAIN_NAME:-localhost}`)
+      - traefik.http.routers.simulator.service=simulator
+      - traefik.http.routers.simulator.entrypoints=http
+    depends_on:
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./config/simulator.config.yaml:/usr/local/simulator/config/config.yaml
+
+  asset:
+    hostname: asset-service
+    restart: unless-stopped
+    build:
+      context: ../../
+      dockerfile: ./build/asset-service/Dockerfile
+    labels:
+      - traefik.enable=true
+      - traefik.tags=public
+      - traefik.http.services.assets.loadbalancer.server.port=80
+      - traefik.http.routers.assets.rule=Host(`asset-service.${DOMAIN_NAME:-localhost}`)
+      - traefik.http.routers.assets.service=assets
+      - traefik.http.routers.assets.entrypoints=http
+    depends_on:
+      mongo:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    volumes:
+      - ./config/asset.config.yaml:/usr/local/asset-service/config/config.yaml
+
+  postgres:
+    image: postgres:16-alpine
+    restart: on-failure
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=assets
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      timeout: 10s
+      interval: 10s
+      retries: 3
+
+  # Main application database is Mongo
+  mongo:
+    image: mongo:8
+    container_name: mongodb
+    hostname: mongodb
+    restart: on-failure
+    #command: "--config /etc/mongo/mongo.conf"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGODB_DATABASE}
+    volumes:
+      - mongodb-data:/data/db
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh ${MONGODB_DATABASE} -u ${MONGODB_USERNAME} -p ${MONGODB_PASSWORD} --quiet
+      start_period: 5s
+      interval: 10s
+      retries: 3
+
+  # Service message bus
+  rabbitmq:
+    image: rabbitmq:4.0-management
+    container_name: rabbitmq
+    hostname: rabbitmq
+    restart: always
+    labels:
+      - traefik.enable=true
+      - traefik.tags=public
+      - traefik.http.services.rabbitmq.loadbalancer.server.port=15672
+      - traefik.http.routers.rabbitmq.rule=Host(`rabbitmq.${DOMAIN_NAME:-localhost}`)
+      - traefik.http.routers.rabbitmq.service=rabbitmq
+      - traefik.http.routers.rabbitmq.entrypoints=http
+    environment:
+      - RABBITMQ_DEFAULT_USER=user
+      - RABBITMQ_DEFAULT_PASS=user
+    ports:
+      - "5672:5672"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Traefik reverse proxy
+  traefik:
+    image: "traefik:v3.0"
+    container_name: "traefik"
+    restart: always
+    command:
+      - "--ping=true"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--accesslog=true"
+      - "--accesslog.format=json"
+      - "--log.level=debug"
+      - "--log.format=json"
+      - "--core.defaultRuleSyntax=v2"
+    labels:
+      - "traefik.enable=true"
+      - traefik.http.routers.traefik-dashboard.rule=Host(`traefik.${DOMAIN_NAME}`)
+      - traefik.http.services.traefik-dashboard.loadbalancer.server.port=8080
+      - traefik.http.routers.traefik-dashboard.service=api@internal
+      - traefik.http.routers.traefik-dashboard.entrypoints=http
+    ports:
+      - "80:80"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+    healthcheck:
+      test: wget --spider --tries=1 http://localhost:8080/ping || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  postgres_data:
+  mongodb-data:

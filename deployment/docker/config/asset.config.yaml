@@ -1,0 +1,19 @@
+observability:
+  tracing:
+    enabled: false
+    address: "lgtm-stack:4317"
+  metrics:
+    enabled: false
+  logging:
+    level: debug
+  profiling:
+    enabled: false
+
+  http:
+    address: ":80"
+    tls:
+      enabled: false
+
+postgres: "postgres://admin:admin@postgres:5432/assets?sslmode=disable"
+rabbitmq: "amqp://user:user@rabbitmq:5672/"
+mongo: "mongodb://mongo:mongo@mongo:27017/?authSource=admin&readPreference=primary&appName=asset-service"

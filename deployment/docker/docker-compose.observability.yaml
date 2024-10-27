@@ -1,0 +1,71 @@
+services:
+  # Expose metrics endpoint and configure tracing in Traefik
+  traefik:
+    profiles:
+      - observability
+    environment:
+      - OTEL_PROPAGATORS=b3,jaeger,tracecontext,baggage
+    command:
+      - "--ping=true"
+      - "--api.insecure=true"
+      - "--api.dashboard=true"
+      - "--providers.docker=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      - "--accesslog=true"
+      - "--accesslog.format=json"
+      - "--log.level=debug"
+      - "--log.format=json"
+      - "--core.defaultRuleSyntax=v2"
+      # Tracing
+      - "--tracing.otlp=true"
+      - "--tracing.otlp.grpc.endpoint=lgtm-stack:4317"
+      - "--tracing.otlp.grpc=true"
+      - "--tracing.otlp.grpc.insecure=true"
+      # Metrics
+      - "--metrics.otlp=true"
+      - "--metrics.otlp.grpc.endpoint=lgtm-stack:4317"
+      - "--metrics.otlp.grpc.insecure=true"
+      - "--metrics.otlp.addRoutersLabels=true"
+      - "--metrics.otlp.addServicesLabels=true"
+      - "--metrics.otlp.addEntryPointsLabels=true"
+      - "--metrics.otlp.pushInterval=10s"
+
+  # Configure the Grafana observability stack
+  grafana-lgtm-stack:
+    image: grafana/otel-lgtm
+    container_name: lgtm-stack
+    hostname: lgtm-stack
+    profiles:
+      - observability
+    labels:
+      - traefik.enable=true
+      - traefik.tags=public
+      - traefik.http.services.grafana.loadbalancer.server.port=3000
+      - traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)
+      - traefik.http.routers.grafana.service=grafana
+      - traefik.http.routers.grafana.entrypoints=http
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_LOG_LEVEL=debug
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource,marcusolsson-json-datasource
+    volumes:
+      - prometheus:/prometheus
+      - loki:/data/loki
+      - grafana:/var/lib/grafana
+
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    command:
+      - "-config.file=/etc/promtail/promtail.yaml"
+    profiles:
+      - observability
+    hostname: promtail
+    restart: always
+    depends_on:
+      - grafana-lgtm-stack
+    volumes:
+      - ./observability/promtail/config.yaml:/etc/promtail/promtail.yaml
+      - /var/run/docker.sock:/var/run/docker.sock:ro
