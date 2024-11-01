@@ -33,7 +33,7 @@ func NewSimpleAssetSimulator(obs observability.Observability, configuration simu
 // Start creates a ticker and generates a measurement at each tick.
 // The measurement is then published via a Publisher.
 func (s *simpleAssetSimulator) Start(ctx context.Context) error {
-	s.obs.Log().Debug("Starting simulator", zap.Any("config", s.simulatorCfg))
+	s.obs.Log().Debug("Starting simple asset simulator", zap.Any("config", s.simulatorCfg))
 	ticker := time.NewTicker(s.simulatorCfg.MeasurementInterval)
 	defer ticker.Stop()
 
@@ -52,15 +52,19 @@ func (s *simpleAssetSimulator) Start(ctx context.Context) error {
 
 func (s *simpleAssetSimulator) publishMessage(ctx context.Context) {
 	timeoutCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
-	timeoutCtx, cancel2 := s.obs.Span(timeoutCtx, "simpleAssetSimulator.publishMessage")
+	timeoutCtx, cancel2 := s.obs.Span(timeoutCtx, "asset-simulator.simple.publishMessage")
 	defer cancel()
 	defer cancel2()
 
 	// Generate measurement
-	measurement := s.simulatorCfg.GenerateRandomMeasurement()
+	measurement, err := s.simulatorCfg.GenerateRandomMeasurement()
+	if err != nil {
+		s.obs.Log().With(zap.Error(err)).Error("Failed to generate random measurement")
+		return
+	}
 
 	// Publish message
-	err := s.publisher.Publish(timeoutCtx, measurement, s.GetId())
+	err = s.publisher.Publish(timeoutCtx, *measurement, s.GetId())
 	if err != nil {
 		s.obs.Log().With(zap.Error(err)).Error("Failed to publish measurement")
 	}

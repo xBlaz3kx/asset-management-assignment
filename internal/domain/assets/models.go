@@ -1,5 +1,7 @@
 package assets
 
+import "github.com/go-playground/validator/v10"
+
 type AssetType string
 
 const (
@@ -10,12 +12,12 @@ const (
 
 type Asset struct {
 	ID          string    `json:"id"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Type        AssetType `json:"type"`
+	Name        string    `json:"name" validate:"required,min=4,max=100"`
+	Description string    `json:"description" validate:"omitempty,min=4,max=100"`
+	Type        AssetType `json:"type" validate:"required,oneof=battery solar wind"`
 	Enabled     bool      `json:"enabled"`
 }
 
 func (a *Asset) Validate() error {
-	return nil
+	return validator.New().Struct(a)
 }

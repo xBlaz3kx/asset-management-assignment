@@ -12,8 +12,8 @@ type Repository interface {
 
 type AssetQuery struct {
 	// Filter by asset name
-	Enabled *bool
+	Enabled *bool `form:"enabled"`
 
 	// Filter by asset type
-	Type *string
+	Type *string `form:"type" binding:"omitempty,oneof=battery solar wind"`
 }

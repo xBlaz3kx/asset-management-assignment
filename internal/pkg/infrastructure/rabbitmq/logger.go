@@ -1,6 +1,7 @@
 package rabbitmq
 
 import (
+	"github.com/wagslane/go-rabbitmq"
 	"github.com/xBlaz3kx/DevX/observability"
 )
 
@@ -8,8 +9,10 @@ type logger struct {
 	obs observability.Observability
 }
 
-func newLogger(obs observability.Observability) *logger {
-	return &logger{}
+func NewLogger(obs observability.Observability) rabbitmq.Logger {
+	return &logger{
+		obs: obs,
+	}
 }
 
 func (l *logger) Fatalf(s string, i ...interface{}) {

@@ -11,6 +11,8 @@ import (
 	"asset-measurements-assignment/internal/pkg/infrastructure/mongo"
 	"asset-measurements-assignment/internal/pkg/infrastructure/postgres"
 	"github.com/GLCharge/otelzap"
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	goRabbit "github.com/wagslane/go-rabbitmq"
 	devxHttp "github.com/xBlaz3kx/DevX/http"
 	"github.com/xBlaz3kx/DevX/observability"
@@ -19,12 +21,15 @@ import (
 
 type Config struct {
 	// Postgres connection string
+	// Example: postgres://user:password@localhost:5432/dbname?sslmode=disable
 	Postgres string `yaml:"postgres" mapstructure:"postgres" json:"postgres"`
 
 	// RabbitMQ connection string
+	// Example: amqp://guest:guest@localhost:5672/
 	Rabbitmq string `yaml:"rabbitmq" mapstructure:"rabbitmq" json:"rabbitmq"`
 
 	// MongoDB connection string
+	// Example: mongodb://localhost:27017
 	Mongo string `yaml:"mongo" mapstructure:"mongo" json:"mongo"`
 
 	// HTTP server settings
@@ -52,6 +57,11 @@ func Run(ctx context.Context, cfg Config) error {
 	}()
 
 	obs.Log().Info("Starting asset service", zap.Any("config", cfg))
+
+	env := viper.GetString("environment")
+	if env != "development" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	// Connect to Postgres
 	postgresDb, err := postgres.Connect(obs, cfg.Postgres)
@@ -125,6 +135,7 @@ func Run(ctx context.Context, cfg Config) error {
 	}()
 
 	<-ctx.Done()
+	obs.Log().Info("Shutting down asset service")
 	httpServer.Shutdown()
 
 	return nil

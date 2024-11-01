@@ -31,7 +31,7 @@ type MeasurementsRepository struct {
 func NewMeasurementsRepository(obs observability.Observability, client *mongo.Database) (*MeasurementsRepository, error) {
 	tso := options.TimeSeries().
 		SetTimeField("timestamp").
-		SetMetaField("asset_id")
+		SetMetaField("assetId")
 	opts := options.CreateCollection().SetTimeSeriesOptions(tso)
 
 	// We will just ignore for now :)
@@ -113,6 +113,8 @@ func (m *MeasurementsRepository) GetAssetMeasurements(ctx context.Context, asset
 	if err != nil {
 		return nil, err
 	}
+
+	// todo pagination?
 
 	return toMeasurements(dbMeasurements), nil
 }

@@ -40,7 +40,7 @@ func (d *AssetGinHandler) GetAssets(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 
 	var query assets.AssetQuery
-	if err := ctx.BindQuery(&query); err != nil {
+	if err := ctx.ShouldBindQuery(&query); err != nil {
 		ctx.JSON(badRequest(err))
 		return
 	}
@@ -58,7 +58,7 @@ func (d *AssetGinHandler) CreateAsset(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 
 	var asset assets.Asset
-	if err := ctx.BindJSON(&asset); err != nil {
+	if err := ctx.ShouldBindJSON(&asset); err != nil {
 		ctx.JSON(badRequest(err))
 		return
 	}
@@ -78,7 +78,7 @@ func (d *AssetGinHandler) UpdateAsset(ctx *gin.Context) {
 	assetId := ctx.Param("assetId")
 
 	var asset assets.Asset
-	if err := ctx.BindJSON(&asset); err != nil {
+	if err := ctx.ShouldBindJSON(&asset); err != nil {
 		ctx.JSON(badRequest(err))
 		return
 	}

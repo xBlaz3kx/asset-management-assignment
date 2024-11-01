@@ -8,6 +8,8 @@ import (
 	"asset-measurements-assignment/internal/pkg/infrastructure/rabbitmq"
 	"asset-measurements-assignment/internal/pkg/simulator_worker"
 	"github.com/GLCharge/otelzap"
+	"github.com/gin-gonic/gin"
+	"github.com/spf13/viper"
 	goRabbit "github.com/wagslane/go-rabbitmq"
 	devxHttp "github.com/xBlaz3kx/DevX/http"
 	"github.com/xBlaz3kx/DevX/observability"
@@ -16,9 +18,11 @@ import (
 
 type Config struct {
 	// Postgres connection string
+	// Example: postgres://user:password@localhost:5432/dbname?sslmode=disable
 	PostgresConnection string `yaml:"postgres" mapstructure:"postgres"`
 
 	// RabbitMQ connection string
+	// Example: amqp://guest:guest@localhost:5672/
 	RabbitMQConnection string `yaml:"rabbitmq" mapstructure:"rabbitmq"`
 
 	// Observability settings
@@ -43,6 +47,11 @@ func Run(ctx context.Context, cfg Config) error {
 	}()
 
 	obs.Log().Info("Starting simulator", zap.Any("config", cfg))
+
+	env := viper.GetString("environment")
+	if env != "development" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	// Connect to Postgres
 	postgresDb, err := postgres.Connect(obs, cfg.PostgresConnection)
@@ -75,7 +84,7 @@ func Run(ctx context.Context, cfg Config) error {
 	}
 
 	// Create new asset simulator worker manager
-	workerManager := simulator_worker.NewAssetSimulatorManager()
+	workerManager := simulator_worker.NewAssetSimulatorManager(obs)
 
 	// Add workers based on fetched configurations
 	for _, config := range configs {
@@ -93,6 +102,7 @@ func Run(ctx context.Context, cfg Config) error {
 	}()
 
 	<-ctx.Done()
+	obs.Log().Info("Shutting down simulator")
 	workerManager.StopAll()
 
 	return nil

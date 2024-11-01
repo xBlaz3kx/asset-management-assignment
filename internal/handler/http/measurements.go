@@ -43,7 +43,7 @@ func (d *MeasurementsGinHandler) GetAvgWithinTimeInterval(ctx *gin.Context) {
 	assetId := ctx.Param("assetId")
 
 	var query measurements.AssetMeasurementAveragedParams
-	if err := ctx.BindQuery(&query); err != nil {
+	if err := ctx.ShouldBindQuery(&query); err != nil {
 		ctx.JSON(badRequest(err))
 		return
 	}
@@ -61,7 +61,13 @@ func (d *MeasurementsGinHandler) GetWithinTimeInterval(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
 
-	assetMeasurements, err := d.service.GetAssetMeasurements(reqCtx, assetId)
+	var query measurements.TimeRange
+	if err := ctx.ShouldBindQuery(&query); err != nil {
+		ctx.JSON(badRequest(err))
+		return
+	}
+
+	assetMeasurements, err := d.service.GetAssetMeasurements(reqCtx, assetId, query)
 	if err != nil {
 		_ = ctx.Error(err)
 		return

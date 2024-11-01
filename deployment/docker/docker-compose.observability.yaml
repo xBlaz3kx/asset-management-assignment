@@ -42,7 +42,7 @@ services:
       - traefik.enable=true
       - traefik.tags=public
       - traefik.http.services.grafana.loadbalancer.server.port=3000
-      - traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME}`)
+      - traefik.http.routers.grafana.rule=Host(`grafana.${DOMAIN_NAME:-localhost}`)
       - traefik.http.routers.grafana.service=grafana
       - traefik.http.routers.grafana.entrypoints=http
     environment:
@@ -67,5 +67,10 @@ services:
     depends_on:
       - grafana-lgtm-stack
     volumes:
-      - ./observability/promtail/config.yaml:/etc/promtail/promtail.yaml
+      - ./observability/promtail.config.yaml:/etc/promtail/promtail.yaml
       - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  prometheus:
+  loki:
+  grafana:

@@ -59,7 +59,7 @@ func (s *service) GetAsset(ctx context.Context, assetId string) (*Asset, error) 
 }
 
 func (s *service) GetAssets(ctx context.Context, query AssetQuery) ([]Asset, error) {
-	ctx, cancel, logger := s.obs.LogSpan(ctx, "assets.service.Getting assets")
+	ctx, cancel, logger := s.obs.LogSpan(ctx, "assets.service.GetAssets")
 	defer cancel()
 	logger.Info("Getting assets", zap.Any("query", query))
 

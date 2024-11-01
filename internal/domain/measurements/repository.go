@@ -13,12 +13,12 @@ type Repository interface {
 }
 
 type TimeRange struct {
-	From *time.Time
-	To   *time.Time
+	From *time.Time `form:"from" binding:"required"`
+	To   *time.Time `form:"to" binding:"required"`
 }
 
 type AssetMeasurementAveragedParams struct {
 	TimeRange
-	GroupBy string
-	Sort    string
+	GroupBy string `form:"groupBy" binding:"required"`
+	Sort    string `form:"sort" binding:"required"`
 }

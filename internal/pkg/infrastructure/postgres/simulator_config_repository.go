@@ -5,28 +5,44 @@ import (
 	"time"
 
 	"asset-measurements-assignment/internal/domain/simulator"
+	"github.com/google/uuid"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 )
 
-// SimulatorConfiguration represents the entity of the configuration in the database.
+// SimulatorConfiguration represents the Simulator Configuration entity.
 type SimulatorConfiguration struct {
-	gorm.Model
+	ID        string `gorm:"primarykey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
 
+	// Version of the configuration
 	Version string
 
+	// AssetId that measurements are generated for
 	AssetId string
 
+	// Type of the asset
 	Type string
 
+	// MeasurementInterval is the interval between measurements
 	MeasurementInterval time.Duration
 
+	// MaxPower is the maximum power value that can be generated
 	MaxPower float64
 
+	// MinPower is the minimum power value that can be generated
 	MinPower float64
 
+	// MaxPowerStep is the maximum step between power values
 	MaxPowerStep float64
+}
+
+func (u *SimulatorConfiguration) BeforeCreate(tx *gorm.DB) (err error) {
+	u.ID = uuid.New().String()
+	return
 }
 
 type SimulatorConfigurationRepository struct {
@@ -41,6 +57,7 @@ func NewSimulatorConfigurationRepository(obs observability.Observability, db *go
 	}
 }
 
+// GetAssetConfiguration returns the configuration for the asset with the given ID.
 func (s *SimulatorConfigurationRepository) GetAssetConfiguration(ctx context.Context, assetId string) (*simulator.Configuration, error) {
 	ctx, cancel := s.obs.Span(ctx, "configuration.repository.GetAssetConfiguration", zap.String("assetId", assetId))
 	defer cancel()
@@ -55,6 +72,7 @@ func (s *SimulatorConfigurationRepository) GetAssetConfiguration(ctx context.Con
 	return &cfg, nil
 }
 
+// GetConfigurations returns configurations for all assets.
 func (s *SimulatorConfigurationRepository) GetConfigurations(ctx context.Context) ([]simulator.Configuration, error) {
 	ctx, cancel := s.obs.Span(ctx, "configuration.repository.GetConfigurations")
 	defer cancel()

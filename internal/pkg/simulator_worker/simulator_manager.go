@@ -3,6 +3,9 @@ package simulator_worker
 import (
 	"context"
 	"sync"
+
+	"github.com/xBlaz3kx/DevX/observability"
+	"go.uber.org/zap"
 )
 
 type AssetSimulator interface {
@@ -14,11 +17,13 @@ type AssetSimulator interface {
 type AssetSimulatorManager struct {
 	wg      sync.WaitGroup
 	mu      sync.Mutex
+	obs     observability.Observability
 	workers map[string]AssetSimulator
 }
 
-func NewAssetSimulatorManager() *AssetSimulatorManager {
+func NewAssetSimulatorManager(obs observability.Observability) *AssetSimulatorManager {
 	return &AssetSimulatorManager{
+		obs:     obs,
 		workers: make(map[string]AssetSimulator),
 	}
 }
@@ -27,6 +32,7 @@ func NewAssetSimulatorManager() *AssetSimulatorManager {
 func (wm *AssetSimulatorManager) AddWorker(worker AssetSimulator) {
 	wm.mu.Lock()
 	defer wm.mu.Unlock()
+	wm.obs.Log().Debug("Adding worker", zap.String("workerId", worker.GetId()))
 
 	wm.workers[worker.GetId()] = worker
 }
@@ -35,6 +41,7 @@ func (wm *AssetSimulatorManager) AddWorker(worker AssetSimulator) {
 func (wm *AssetSimulatorManager) RemoveWorker(workerId string) {
 	wm.mu.Lock()
 	defer wm.mu.Unlock()
+	wm.obs.Log().Debug("Removing worker", zap.String("workerId", workerId))
 
 	delete(wm.workers, workerId)
 }
@@ -61,6 +68,8 @@ func (wm *AssetSimulatorManager) StartWorkers(ctx context.Context) {
 	workers := wm.GetWorkers()
 	wm.wg.Add(len(workers))
 
+	wm.obs.Log().Info("Starting workers", zap.Int("count", len(workers)))
+
 	for _, worker := range workers {
 		// Start worker in a goroutine
 		go func() {
@@ -77,6 +86,8 @@ func (wm *AssetSimulatorManager) StartWorkers(ctx context.Context) {
 func (wm *AssetSimulatorManager) StopAll() {
 	wm.mu.Lock()
 	defer wm.mu.Unlock()
+
+	wm.obs.Log().Info("Stopping all workers", zap.Int("count", len(wm.workers)))
 
 	for _, worker := range wm.workers {
 		err := worker.Stop()

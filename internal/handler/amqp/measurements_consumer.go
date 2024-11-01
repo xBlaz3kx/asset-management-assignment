@@ -7,6 +7,7 @@ import (
 
 	"asset-measurements-assignment/internal/domain/measurements"
 	"asset-measurements-assignment/internal/domain/measurements/service"
+	rmq "asset-measurements-assignment/internal/pkg/infrastructure/rabbitmq"
 	"github.com/wagslane/go-rabbitmq"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.opentelemetry.io/otel/trace"
@@ -28,7 +29,7 @@ func NewHandler(obs observability.Observability, conn *rabbitmq.Conn, service se
 		conn,
 		"",
 		// Enable consumer logging
-		rabbitmq.WithConsumerOptionsLogging,
+		rabbitmq.WithConsumerOptionsLogger(rmq.NewLogger(obs)),
 		rabbitmq.WithConsumerOptionsRoutingKey(measurementRoutingKey),
 		rabbitmq.WithConsumerOptionsExchangeName(measurementExchange),
 		rabbitmq.WithConsumerOptionsQueueDurable,
@@ -45,7 +46,7 @@ func NewHandler(obs observability.Observability, conn *rabbitmq.Conn, service se
 }
 
 func (h *Handler) Start(ctx context.Context) error {
-	// Start consuming messages
+	// Start consuming messages in a separate goroutine
 	go func() {
 		err := h.consumer.Run(h.handleMeasurement(ctx))
 		if err != nil {
@@ -56,11 +57,11 @@ func (h *Handler) Start(ctx context.Context) error {
 	return nil
 }
 
+// handleMeasurement handles the incoming measurement messages.
+// It unmarshal the message, gets the assetId from the header and attempts to store the measurement.
 func (h *Handler) handleMeasurement(ctx context.Context) func(d rabbitmq.Delivery) (action rabbitmq.Action) {
 	return func(delivery rabbitmq.Delivery) (action rabbitmq.Action) {
-		consumeCtx, cancel, logger := h.obs.LogSpanWithTimeout(
-			ctx,
-			"measurement.consumer.handleMeasurement",
+		consumeCtx, cancel, logger := h.obs.LogSpanWithTimeout(ctx, "measurement.consumer.Handle",
 			time.Second*10,
 		)
 		defer cancel()
@@ -90,6 +91,7 @@ func (h *Handler) handleMeasurement(ctx context.Context) func(d rabbitmq.Deliver
 	}
 }
 
+// Close closes the consumer.
 func (h *Handler) Close() error {
 	h.consumer.Close()
 	return nil

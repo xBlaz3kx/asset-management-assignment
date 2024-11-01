@@ -38,22 +38,21 @@ func (c *Configuration) Validate() error {
 	switch c.Type {
 	case AssetTypeBattery, AssetTypeSolar, AssetTypeWind:
 		// Allowed
+		return nil
 	default:
 		return errors.Errorf("invalid asset type: %s", c.Type)
 	}
-
-	return nil
 }
 
-func (c *Configuration) GenerateRandomMeasurement() measurements.Measurement {
+func (c *Configuration) GenerateRandomMeasurement() (*measurements.Measurement, error) {
 	maxPower := measurements.Power{
 		Value: c.MaxPower,
 		Unit:  measurements.UnitWatt,
 	}
 	minPower := measurements.Power{
-		Value: c.MaxPower,
+		Value: c.MinPower,
 		Unit:  measurements.UnitWatt,
 	}
 
-	return measurements.NewRandomMeasurement(maxPower, minPower, c.MaxPowerStep)
+	return measurements.NewRandomMeasurement(minPower, maxPower, c.MaxPowerStep)
 }

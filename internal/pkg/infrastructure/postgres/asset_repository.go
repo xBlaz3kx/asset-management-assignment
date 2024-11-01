@@ -2,8 +2,10 @@ package postgres
 
 import (
 	"context"
+	"time"
 
 	"asset-measurements-assignment/internal/domain/assets"
+	"github.com/google/uuid"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
@@ -11,11 +13,19 @@ import (
 
 // Asset represents an asset entity in the database.
 type Asset struct {
-	gorm.Model
-	Name        string `gorm:"unique"`
+	ID          string `gorm:"primarykey"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	Name        string         `gorm:"unique"`
 	Description string
 	Type        string
 	Enabled     bool
+}
+
+func (u *Asset) BeforeCreate(tx *gorm.DB) (err error) {
+	u.ID = uuid.New().String()
+	return
 }
 
 type AssetRepository struct {
@@ -30,17 +40,13 @@ func NewAssetRepository(obs observability.Observability, db *gorm.DB) *AssetRepo
 	}
 }
 
+// CreateAsset creates an asset in the database.
 func (a *AssetRepository) CreateAsset(ctx context.Context, asset assets.Asset) error {
 	ctx, cancel := a.obs.Span(ctx, "asset.repository.CreateAsset", zap.Any("asset", asset))
 	defer cancel()
 
 	// Convert domain asset to database asset
-	dbAsset := Asset{
-		Name:        asset.Name,
-		Description: asset.Description,
-		Type:        string(asset.Type),
-		Enabled:     asset.Enabled,
-	}
+	dbAsset := toDBAsset(asset)
 
 	// Create asset in the database
 	result := a.db.WithContext(ctx).Create(&dbAsset)
@@ -51,13 +57,14 @@ func (a *AssetRepository) CreateAsset(ctx context.Context, asset assets.Asset) e
 	return nil
 }
 
+// UpdateAsset updates an asset in the database.
 func (a *AssetRepository) UpdateAsset(ctx context.Context, assetId string, asset assets.Asset) error {
 	ctx, cancel := a.obs.Span(ctx, "asset.repository.UpdateAsset", zap.String("assetId", assetId))
 	defer cancel()
 
 	// Convert domain asset to database asset
 	dbAsset := toDBAsset(asset)
-	//dbAsset.ID = assetId
+	dbAsset.ID = assetId
 
 	// Update asset in the database
 	result := a.db.WithContext(ctx).Save(&dbAsset)
@@ -68,6 +75,7 @@ func (a *AssetRepository) UpdateAsset(ctx context.Context, assetId string, asset
 	return nil
 }
 
+// DeleteAsset deletes an asset from the database.
 func (a *AssetRepository) DeleteAsset(ctx context.Context, assetId string) error {
 	ctx, cancel := a.obs.Span(ctx, "asset.repository.DeleteAsset", zap.String("assetId", assetId))
 	defer cancel()
@@ -81,6 +89,7 @@ func (a *AssetRepository) DeleteAsset(ctx context.Context, assetId string) error
 	return nil
 }
 
+// GetAsset retrieves an asset from the database.
 func (a *AssetRepository) GetAsset(ctx context.Context, assetId string) (*assets.Asset, error) {
 	ctx, cancel := a.obs.Span(ctx, "asset.repository.GetAsset", zap.String("assetId", assetId))
 	defer cancel()
@@ -97,13 +106,23 @@ func (a *AssetRepository) GetAsset(ctx context.Context, assetId string) (*assets
 	return &asset, nil
 }
 
+// GetAssets retrieves assets based on filters from the database.
 func (a *AssetRepository) GetAssets(ctx context.Context, query assets.AssetQuery) ([]assets.Asset, error) {
 	ctx, cancel := a.obs.Span(ctx, "asset.repository.GetAssets", zap.Any("query", query))
 	defer cancel()
 
+	db := a.db.WithContext(ctx)
+	if query.Enabled != nil {
+		db = db.Where("enabled = ?", *query.Enabled)
+	}
+
+	if query.Type != nil {
+		db = db.Where("type = ?", *query.Type)
+	}
+
 	// Get assets from the database
 	var dbAssets []Asset
-	result := a.db.WithContext(ctx).Find(&dbAssets)
+	result := db.Find(&dbAssets)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -115,6 +134,7 @@ func (a *AssetRepository) GetAssets(ctx context.Context, query assets.AssetQuery
 
 func toDomainAsset(dbAsset Asset) assets.Asset {
 	return assets.Asset{
+		ID:          dbAsset.ID,
 		Name:        dbAsset.Name,
 		Description: dbAsset.Description,
 		Type:        assets.AssetType(dbAsset.Type),

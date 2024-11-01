@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	measurementPublishTopic = "measurements"
-	measurementExchange     = "measurements"
+	measurementPublishTopic = "measurement"
+	measurementExchange     = "measurement"
 )
 
 type MeasurementPublisher struct {
@@ -25,8 +25,7 @@ func NewMeasurementPublisher(obs observability.Observability, conn *rabbitmq.Con
 	publisher, err := rabbitmq.NewPublisher(
 		conn,
 		// Enable publisher logging
-		rabbitmq.WithPublisherOptionsLogging,
-		rabbitmq.WithPublisherOptionsLogger(newLogger(obs)),
+		rabbitmq.WithPublisherOptionsLogger(NewLogger(obs)),
 		rabbitmq.WithPublisherOptionsExchangeName(measurementExchange),
 		rabbitmq.WithPublisherOptionsExchangeDurable,
 		rabbitmq.WithPublisherOptionsExchangeKind("topic"),
@@ -47,21 +46,25 @@ func (p *MeasurementPublisher) Publish(ctx context.Context, measurement measurem
 	defer cancel()
 	logger.Info("Publishing measurement", zap.Any("measurement", measurement), zap.String("assetId", assetId))
 
+	// Marshal the measurement to JSON
 	marshal, err := json.Marshal(measurement)
 	if err != nil {
 		return err
 	}
 
+	// Add the assetId to the headers
 	headers := rabbitmq.Table{
 		"assetId": assetId,
 	}
 
+	// Publish the measurement
 	err = p.publisher.PublishWithContext(
 		ctx,
 		marshal,
 		[]string{measurementPublishTopic},
 		rabbitmq.WithPublishOptionsContentType("application/json"),
 		rabbitmq.WithPublishOptionsHeaders(headers),
+		rabbitmq.WithPublishOptionsExchange(measurementExchange),
 	)
 	return err
 }
