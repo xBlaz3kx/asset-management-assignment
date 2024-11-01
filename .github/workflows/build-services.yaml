@@ -27,21 +27,17 @@ on:
 jobs:
 
   build-asset-service:
-    name: "Build and Push Asset service"
+    name: "Build Asset service"
     uses: ./.github/workflows/build.yaml
     with:
-      service: asset
-      push: false
-      docker_repository: asset-service
+      service: asset-service
       dockerfile: "./build/asset-service/Dockerfile"
     secrets: inherit
 
   build-simulator-service:
-    name: "Build and Push Simulator service"
+    name: "Build Simulator service"
     uses: ./.github/workflows/build.yaml
     with:
-      service: simulator-service
-      push: false
-      docker_repository: simulator_service
+      service: simulator
       dockerfile: "./build/simulator-service/Dockerfile"
     secrets: inherit
