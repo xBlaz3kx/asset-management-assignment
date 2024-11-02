@@ -29,7 +29,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ inputs.service }}:${{ github.sha }}
+          images: asset-${{ inputs.service }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
