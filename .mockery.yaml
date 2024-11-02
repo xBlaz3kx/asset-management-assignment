@@ -1,0 +1,23 @@
+with-expecter: True
+dir: "{{.InterfaceDirRelative}}/mocks"
+mockname: "Mock{{.InterfaceName }}"
+outpkg: "{{.PackageName}}"
+filename: "{{.InterfaceName | snakecase | lower}}_mock.go"
+all: True
+packages:
+  asset-measurements-assignment/internal/domain/assets:
+
+  asset-measurements-assignment/internal/domain/measurements:
+    config:
+      recursive: True
+
+  asset-measurements-assignment/internal/domain/simulator:
+    config:
+      recursive: True
+
+  asset-measurements-assignment/internal/pkg/asset_simulation:
+    config:
+      recursive: True
+      inpackage: true
+      dir: "{{.InterfaceDirRelative}}"
+      outpkg: "{{.PackageName}}"

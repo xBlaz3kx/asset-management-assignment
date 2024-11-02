@@ -118,6 +118,14 @@ func (m *MeasurementsRepository) GetAssetMeasurements(ctx context.Context, asset
 	return toMeasurements(dbMeasurements), nil
 }
 
+// Aggregation pipeline result
+type AveragedMeasurement struct {
+	ID            time.Time `bson:"_id"`
+	PowerAvg      float64   `bson:"power"`
+	StateOfEnergy float64   `bson:"SoE"`
+	AssetID       string    `bson:"assetId"`
+}
+
 func (m *MeasurementsRepository) GetAssetMeasurementsAveraged(ctx context.Context, assetID string, params measurements.AssetMeasurementAveragedParams) ([]measurements.Measurement, error) {
 	ctx, cancel := m.obs.Span(ctx, "measurements.repository.GetAssetMeasurementsAveraged", zap.String("assetID", assetID), zap.Any("params", params))
 	defer cancel()
@@ -132,7 +140,7 @@ func (m *MeasurementsRepository) GetAssetMeasurementsAveraged(ctx context.Contex
 		}},
 	}
 
-	// Determine groupby instruction
+	// Determine group by instruction
 	dateTruncParams, err := groupDateInterval(params.GroupBy)
 	if err != nil {
 		return nil, err
@@ -171,13 +179,13 @@ func (m *MeasurementsRepository) GetAssetMeasurementsAveraged(ctx context.Contex
 		return nil, err
 	}
 
-	var dbMeasurements []Measurement
-	err = cursor.Decode(&dbMeasurements)
+	var dbMeasurements []AveragedMeasurement
+	err = cursor.All(ctx, &dbMeasurements)
 	if err != nil {
 		return nil, err
 	}
 
-	return toMeasurements(dbMeasurements), nil
+	return toMeasurementsFromAverage(dbMeasurements), nil
 }
 
 func toMeasurement(measurement *Measurement) *measurements.Measurement {
@@ -186,6 +194,18 @@ func toMeasurement(measurement *Measurement) *measurements.Measurement {
 		Power:         measurement.Power,
 		StateOfEnergy: measurement.StateOfEnergy,
 	}
+}
+
+func toMeasurementsFromAverage(m []AveragedMeasurement) []measurements.Measurement {
+	result := make([]measurements.Measurement, len(m))
+	for i, measurement := range m {
+		result[i] = measurements.Measurement{
+			Time:          measurement.ID,
+			Power:         measurements.Power{Value: measurement.PowerAvg, Unit: measurements.UnitWatt},
+			StateOfEnergy: measurement.StateOfEnergy,
+		}
+	}
+	return result
 }
 
 func toMeasurements(m []Measurement) []measurements.Measurement {

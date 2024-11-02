@@ -1,4 +1,4 @@
-package simulator_worker
+package asset_simulation
 
 import (
 	"context"
@@ -76,7 +76,7 @@ func (wm *AssetSimulatorManager) StartWorkers(ctx context.Context) {
 			defer wm.wg.Done()
 			err := worker.Start(ctx)
 			if err != nil {
-				return
+				wm.obs.Log().With(zap.Error(err)).Error("Unable to start worker")
 			}
 		}()
 	}
@@ -92,6 +92,7 @@ func (wm *AssetSimulatorManager) StopAll() {
 	for _, worker := range wm.workers {
 		err := worker.Stop()
 		if err != nil {
+			wm.obs.Log().With(zap.Error(err)).Error("Unable to stop worker")
 			continue
 		}
 	}

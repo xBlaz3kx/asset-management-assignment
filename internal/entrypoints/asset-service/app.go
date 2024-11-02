@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"asset-measurements-assignment/internal/domain/assets"
-	service2 "asset-measurements-assignment/internal/domain/measurements/service"
+	measurements "asset-measurements-assignment/internal/domain/measurements/service"
 	"asset-measurements-assignment/internal/handler/amqp"
 	"asset-measurements-assignment/internal/handler/http"
 	"asset-measurements-assignment/internal/pkg/infrastructure/mongo"
@@ -88,7 +88,7 @@ func Run(ctx context.Context, cfg Config) error {
 	}
 
 	// Create consumer service
-	consumerService := service2.NewConsumerService(obs, measurementsRepository, assetRepository)
+	consumerService := measurements.NewConsumerService(obs, measurementsRepository, assetRepository)
 
 	rabbitMqConn, err := goRabbit.NewConn(cfg.Rabbitmq,
 		goRabbit.WithConnectionOptionsLogging,
@@ -112,17 +112,17 @@ func Run(ctx context.Context, cfg Config) error {
 	}
 
 	// Create asset service
-	service := assets.NewService(obs, assetRepository)
+	assetService := assets.NewService(obs, assetRepository)
 
 	// Create measurements service
-	measurementsService := service2.NewService(obs, measurementsRepository)
+	measurementsService := measurements.NewMeasurementsService(obs, measurementsRepository)
 
 	// Create HTTP server
 	httpServer := devxHttp.NewServer(cfg.Http, obs)
 	router := httpServer.Router()
 
 	// Asset handler
-	handler := http.NewAssetGinHandler(service)
+	handler := http.NewAssetGinHandler(assetService)
 	handler.RegisterRoutes(router)
 
 	// Measurements handler

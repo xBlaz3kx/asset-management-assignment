@@ -13,7 +13,7 @@ type measurementsService struct {
 	repository measurements.Repository
 }
 
-func NewService(obs observability.Observability, repository measurements.Repository) measurements.Service {
+func NewMeasurementsService(obs observability.Observability, repository measurements.Repository) measurements.Service {
 	return &measurementsService{
 		obs:        obs,
 		repository: repository,

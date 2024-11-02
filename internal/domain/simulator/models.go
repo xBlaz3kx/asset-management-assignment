@@ -3,7 +3,6 @@ package simulator
 import (
 	"time"
 
-	"asset-measurements-assignment/internal/domain/measurements"
 	"github.com/pkg/errors"
 )
 
@@ -29,9 +28,18 @@ type Configuration struct {
 }
 
 func (c *Configuration) Validate() error {
+	if c.AssetId == "" {
+		return errors.New("assetId is required")
+	}
+
 	// Check if minPower is less than maxPower
 	if c.MinPower > c.MaxPower {
 		return ErrMinPowerGreaterThanMaxPower
+	}
+
+	// Sanity check the measurement interval
+	if c.MeasurementInterval <= time.Millisecond*100 {
+		return errors.New("measurementInterval must be greater than 0")
 	}
 
 	// Validate the type
@@ -42,17 +50,4 @@ func (c *Configuration) Validate() error {
 	default:
 		return errors.Errorf("invalid asset type: %s", c.Type)
 	}
-}
-
-func (c *Configuration) GenerateRandomMeasurement() (*measurements.Measurement, error) {
-	maxPower := measurements.Power{
-		Value: c.MaxPower,
-		Unit:  measurements.UnitWatt,
-	}
-	minPower := measurements.Power{
-		Value: c.MinPower,
-		Unit:  measurements.UnitWatt,
-	}
-
-	return measurements.NewRandomMeasurement(minPower, maxPower, c.MaxPowerStep)
 }

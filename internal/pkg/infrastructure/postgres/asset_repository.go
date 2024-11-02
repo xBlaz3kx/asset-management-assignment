@@ -67,7 +67,7 @@ func (a *AssetRepository) UpdateAsset(ctx context.Context, assetId string, asset
 	dbAsset.ID = assetId
 
 	// Update asset in the database
-	result := a.db.WithContext(ctx).Save(&dbAsset)
+	result := a.db.WithContext(ctx).Updates(&dbAsset)
 	if result.Error != nil {
 		return result.Error
 	}

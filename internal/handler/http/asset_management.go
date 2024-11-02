@@ -74,7 +74,6 @@ func (d *AssetGinHandler) CreateAsset(ctx *gin.Context) {
 
 func (d *AssetGinHandler) UpdateAsset(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
-
 	assetId := ctx.Param("assetId")
 
 	var asset assets.Asset
@@ -94,7 +93,6 @@ func (d *AssetGinHandler) UpdateAsset(ctx *gin.Context) {
 
 func (d *AssetGinHandler) DeleteAsset(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
-
 	assetId := ctx.Param("assetId")
 
 	err := d.service.DeleteAsset(reqCtx, assetId)

@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
+	"asset-measurements-assignment/internal/domain/simulator"
+	"asset-measurements-assignment/internal/pkg/asset_simulation"
 	"asset-measurements-assignment/internal/pkg/infrastructure/postgres"
 	"asset-measurements-assignment/internal/pkg/infrastructure/rabbitmq"
-	"asset-measurements-assignment/internal/pkg/simulator_worker"
 	"github.com/GLCharge/otelzap"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -84,13 +85,10 @@ func Run(ctx context.Context, cfg Config) error {
 	}
 
 	// Create new asset simulator worker manager
-	workerManager := simulator_worker.NewAssetSimulatorManager(obs)
+	workerManager := asset_simulation.NewAssetSimulatorManager(obs)
 
 	// Add workers based on fetched configurations
-	for _, config := range configs {
-		worker := simulator_worker.NewSimpleAssetSimulator(obs, config, measurementPublisher)
-		workerManager.AddWorker(worker)
-	}
+	createWorkersFromConfigurations(obs, workerManager, configs, measurementPublisher)
 
 	// Start asset simulator workers
 	workerManager.StartWorkers(ctx)
@@ -106,4 +104,30 @@ func Run(ctx context.Context, cfg Config) error {
 	workerManager.StopAll()
 
 	return nil
+}
+
+func createWorkersFromConfigurations(
+	obs observability.Observability,
+	workerManager *asset_simulation.AssetSimulatorManager,
+	configs []simulator.Configuration,
+	measurementPublisher *rabbitmq.MeasurementPublisher,
+) {
+	for _, config := range configs {
+
+		configuration := asset_simulation.Configuration{
+			AssetId:             config.AssetId,
+			MinPower:            config.MinPower,
+			MaxPower:            config.MaxPower,
+			MaxPowerStep:        config.MaxPowerStep,
+			MeasurementInterval: config.MeasurementInterval,
+		}
+
+		worker, err := asset_simulation.NewSimpleAssetSimulator(obs, configuration, measurementPublisher)
+		if err != nil {
+			obs.Log().Error("Failed to create worker", zap.Error(err))
+			continue
+		}
+
+		workerManager.AddWorker(worker)
+	}
 }
