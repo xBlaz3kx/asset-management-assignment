@@ -80,3 +80,4 @@ fabric.properties
 deployment/docker/
 build
 .github
+*.md
