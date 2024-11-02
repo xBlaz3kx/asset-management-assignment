@@ -39,5 +39,5 @@ jobs:
     uses: ./.github/workflows/build.yaml
     with:
       service: simulator
-      dockerfile: "./build/simulator-service/Dockerfile"
+      dockerfile: "./build/simulator/Dockerfile"
     secrets: inherit
