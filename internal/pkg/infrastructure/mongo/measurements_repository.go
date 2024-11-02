@@ -7,7 +7,7 @@ import (
 
 	"asset-measurements-assignment/internal/domain/measurements"
 	"github.com/xBlaz3kx/DevX/observability"
-	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.uber.org/zap"
@@ -31,7 +31,8 @@ type MeasurementsRepository struct {
 func NewMeasurementsRepository(obs observability.Observability, client *mongo.Database) (*MeasurementsRepository, error) {
 	tso := options.TimeSeries().
 		SetTimeField("timestamp").
-		SetMetaField("assetId")
+		SetMetaField("assetId").
+		SetGranularity("seconds")
 	opts := options.CreateCollection().SetTimeSeriesOptions(tso)
 
 	// We will just ignore for now :)
@@ -108,13 +109,11 @@ func (m *MeasurementsRepository) GetAssetMeasurements(ctx context.Context, asset
 		return nil, err
 	}
 
-	var dbMeasurements []*Measurement
-	err = cursor.All(ctx, dbMeasurements)
+	var dbMeasurements []Measurement
+	err = cursor.All(ctx, &dbMeasurements)
 	if err != nil {
 		return nil, err
 	}
-
-	// todo pagination?
 
 	return toMeasurements(dbMeasurements), nil
 }
@@ -123,8 +122,62 @@ func (m *MeasurementsRepository) GetAssetMeasurementsAveraged(ctx context.Contex
 	ctx, cancel := m.obs.Span(ctx, "measurements.repository.GetAssetMeasurementsAveraged", zap.String("assetID", assetID), zap.Any("params", params))
 	defer cancel()
 
-	// todo aggregation query?
-	return nil, nil
+	matchStage := bson.D{
+		{"$match", bson.D{
+			{"assetId", assetID},
+			{"timestamp", bson.D{
+				{"$gte", params.From},
+				{"$lte", params.To},
+			}},
+		}},
+	}
+
+	// Determine groupby instruction
+	dateTruncParams, err := groupDateInterval(params.GroupBy)
+	if err != nil {
+		return nil, err
+	}
+
+	groupStage := bson.D{
+		{"$group", bson.D{
+			{"_id", bson.D{
+				{"$dateTrunc", dateTruncParams},
+			}},
+			{"power", bson.D{{"$avg", "$power.value"}}},
+			{"SoE", bson.D{{"$avg", "$stateOfEnergy"}}},
+			{"assetId", bson.D{{"$first", "$assetId"}}},
+		}},
+	}
+
+	val, err := sortBy(params.Sort)
+	if err != nil {
+		return nil, err
+	}
+
+	sortStage := bson.D{
+		{"$sort",
+			bson.D{
+				{
+					Key: "powerAvg", Value: val,
+				},
+			},
+		},
+	}
+
+	pipeline := mongo.Pipeline{matchStage, groupStage, sortStage}
+	opts := options.Aggregate()
+	cursor, err := m.collection.Aggregate(ctx, pipeline, opts)
+	if err != nil {
+		return nil, err
+	}
+
+	var dbMeasurements []Measurement
+	err = cursor.Decode(&dbMeasurements)
+	if err != nil {
+		return nil, err
+	}
+
+	return toMeasurements(dbMeasurements), nil
 }
 
 func toMeasurement(measurement *Measurement) *measurements.Measurement {
@@ -135,10 +188,10 @@ func toMeasurement(measurement *Measurement) *measurements.Measurement {
 	}
 }
 
-func toMeasurements(m []*Measurement) []measurements.Measurement {
+func toMeasurements(m []Measurement) []measurements.Measurement {
 	result := make([]measurements.Measurement, len(m))
 	for i, measurement := range m {
-		result[i] = *toMeasurement(measurement)
+		result[i] = *toMeasurement(&measurement)
 	}
 	return result
 }
