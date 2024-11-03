@@ -67,6 +67,11 @@ func (h *Handler) handleMeasurement(ctx context.Context) func(d rabbitmq.Deliver
 		defer cancel()
 		logger.Info("Consuming measurement")
 
+		// Check if the content type is JSON
+		if delivery.ContentType != "application/json" {
+			return rabbitmq.NackDiscard
+		}
+
 		// Unmarshal the message
 		var measurement measurements.Measurement
 		err := json.Unmarshal(delivery.Body, &measurement)
@@ -84,6 +89,7 @@ func (h *Handler) handleMeasurement(ctx context.Context) func(d rabbitmq.Deliver
 		err = h.service.AddMeasurement(consumeCtx, assetID, measurement)
 		if err != nil {
 			logger.With(zap.Error(err)).Error("Failed to store measurement")
+			// Requeue?
 			return rabbitmq.NackDiscard
 		}
 
