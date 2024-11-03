@@ -6,6 +6,11 @@ filename: "{{.InterfaceName | snakecase | lower}}_mock.go"
 all: True
 packages:
   asset-measurements-assignment/internal/domain/assets:
+    config:
+      recursive: True
+      inpackage: true
+      dir: "{{.InterfaceDirRelative}}"
+      outpkg: "{{.PackageName}}"
 
   asset-measurements-assignment/internal/domain/measurements:
     config:
@@ -15,7 +20,7 @@ packages:
     config:
       recursive: True
 
-  asset-measurements-assignment/internal/pkg/asset_simulation:
+  asset-measurements-assignment/internal/simulator/asset_simulation:
     config:
       recursive: True
       inpackage: true
