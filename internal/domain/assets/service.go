@@ -39,6 +39,12 @@ func (s *service) UpdateAsset(ctx context.Context, assetId string, asset Asset) 
 	defer cancel()
 	logger.Info("Updating an asset", zap.Any("assetId", assetId))
 
+	// Validate the asset
+	err := asset.Validate()
+	if err != nil {
+		return err
+	}
+
 	return s.repository.UpdateAsset(ctx, assetId, asset)
 }
 
