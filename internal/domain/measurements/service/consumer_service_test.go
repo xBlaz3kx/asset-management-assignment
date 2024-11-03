@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"asset-measurements-assignment/internal/domain/assets"
-	assetsMocks "asset-measurements-assignment/internal/domain/assets/mocks"
+	assetsMocks "asset-measurements-assignment/internal/domain/assets"
 	"asset-measurements-assignment/internal/domain/measurements"
 	measurementMocks "asset-measurements-assignment/internal/domain/measurements/mocks"
 	"github.com/pkg/errors"
