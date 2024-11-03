@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	"asset-measurements-assignment/internal/entrypoints/asset-service"
+	"asset-measurements-assignment/internal/asset-service"
 	"github.com/GLCharge/otelzap"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

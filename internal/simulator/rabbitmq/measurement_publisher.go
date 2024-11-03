@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 
 	"asset-measurements-assignment/internal/domain/measurements"
+	rabbitmq2 "asset-measurements-assignment/internal/pkg/infrastructure/rabbitmq"
 	"github.com/wagslane/go-rabbitmq"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.opentelemetry.io/otel/trace"
@@ -25,7 +26,7 @@ func NewMeasurementPublisher(obs observability.Observability, conn *rabbitmq.Con
 	publisher, err := rabbitmq.NewPublisher(
 		conn,
 		// Enable publisher logging
-		rabbitmq.WithPublisherOptionsLogger(NewLogger(obs)),
+		rabbitmq.WithPublisherOptionsLogger(rabbitmq2.NewLogger(obs)),
 		rabbitmq.WithPublisherOptionsExchangeName(measurementExchange),
 		rabbitmq.WithPublisherOptionsExchangeDurable,
 		rabbitmq.WithPublisherOptionsExchangeKind("topic"),

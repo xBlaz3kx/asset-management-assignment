@@ -5,9 +5,10 @@ import (
 	"time"
 
 	"asset-measurements-assignment/internal/domain/simulator"
-	"asset-measurements-assignment/internal/pkg/asset_simulation"
 	"asset-measurements-assignment/internal/pkg/infrastructure/postgres"
-	"asset-measurements-assignment/internal/pkg/infrastructure/rabbitmq"
+	assetSimulation "asset-measurements-assignment/internal/simulator/asset_simulation"
+	postgres2 "asset-measurements-assignment/internal/simulator/postgres"
+	"asset-measurements-assignment/internal/simulator/rabbitmq"
 	"github.com/GLCharge/otelzap"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -70,7 +71,7 @@ func Run(ctx context.Context, cfg Config) error {
 	defer rabbitmqConn.Close()
 
 	// Create new simulator configuration repository
-	configRepository := postgres.NewSimulatorConfigurationRepository(obs, postgresDb)
+	configRepository := postgres2.NewSimulatorConfigurationRepository(obs, postgresDb)
 
 	// Fetch assets from Postgres
 	configs, err := configRepository.GetConfigurations(ctx)
@@ -85,7 +86,7 @@ func Run(ctx context.Context, cfg Config) error {
 	}
 
 	// Create new asset simulator worker manager
-	workerManager := asset_simulation.NewAssetSimulatorManager(obs)
+	workerManager := assetSimulation.NewAssetSimulatorManager(obs)
 
 	// Add workers based on fetched configurations
 	createWorkersFromConfigurations(obs, workerManager, configs, measurementPublisher)
@@ -108,13 +109,13 @@ func Run(ctx context.Context, cfg Config) error {
 
 func createWorkersFromConfigurations(
 	obs observability.Observability,
-	workerManager *asset_simulation.AssetSimulatorManager,
+	workerManager *assetSimulation.AssetSimulatorManager,
 	configs []simulator.Configuration,
 	measurementPublisher *rabbitmq.MeasurementPublisher,
 ) {
 	for _, config := range configs {
 
-		configuration := asset_simulation.Configuration{
+		configuration := assetSimulation.Configuration{
 			AssetId:             config.AssetId,
 			MinPower:            config.MinPower,
 			MaxPower:            config.MaxPower,
@@ -122,7 +123,7 @@ func createWorkersFromConfigurations(
 			MeasurementInterval: config.MeasurementInterval,
 		}
 
-		worker, err := asset_simulation.NewSimpleAssetSimulator(obs, configuration, measurementPublisher)
+		worker, err := assetSimulation.NewSimpleAssetSimulator(obs, configuration, measurementPublisher)
 		if err != nil {
 			obs.Log().Error("Failed to create worker", zap.Error(err))
 			continue

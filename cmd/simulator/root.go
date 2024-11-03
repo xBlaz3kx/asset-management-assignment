@@ -5,7 +5,7 @@ import (
 	"os"
 	"os/signal"
 
-	"asset-measurements-assignment/internal/entrypoints/simulator"
+	"asset-measurements-assignment/internal/simulator"
 	"github.com/GLCharge/otelzap"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

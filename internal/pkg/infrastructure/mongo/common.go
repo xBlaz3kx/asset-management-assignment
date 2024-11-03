@@ -5,7 +5,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/bson"
 )
 
-func groupDateInterval(groupBy string) (bson.D, error) {
+func GroupDateInterval(groupBy string) (bson.D, error) {
 	// Determine groupby instruction
 	dateTruncParams := bson.D{
 		{"date", "$timestamp"},
@@ -24,7 +24,7 @@ func groupDateInterval(groupBy string) (bson.D, error) {
 	return dateTruncParams, nil
 }
 
-func sortBy(sort string) (int, error) {
+func SortBy(sort string) (int, error) {
 	switch sort {
 	case "asc":
 		return 1, nil

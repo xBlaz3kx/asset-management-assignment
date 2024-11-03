@@ -4,10 +4,12 @@ import (
 	"context"
 	"time"
 
+	http2 "asset-measurements-assignment/internal/asset-service/http"
+	"asset-measurements-assignment/internal/asset-service/mongodb"
+	postgres2 "asset-measurements-assignment/internal/asset-service/postgres"
+	"asset-measurements-assignment/internal/asset-service/rabbitmq"
 	"asset-measurements-assignment/internal/domain/assets"
 	measurements "asset-measurements-assignment/internal/domain/measurements/service"
-	"asset-measurements-assignment/internal/handler/amqp"
-	"asset-measurements-assignment/internal/handler/http"
 	"asset-measurements-assignment/internal/pkg/infrastructure/mongo"
 	"asset-measurements-assignment/internal/pkg/infrastructure/postgres"
 	"github.com/GLCharge/otelzap"
@@ -70,7 +72,7 @@ func Run(ctx context.Context, cfg Config) error {
 	}
 
 	// Create asset repository
-	assetRepository := postgres.NewAssetRepository(obs, postgresDb)
+	assetRepository := postgres2.NewAssetRepository(obs, postgresDb)
 
 	// Connect to MongoDB
 	mongoClient, err := mongo.NewClient(cfg.Mongo)
@@ -82,7 +84,7 @@ func Run(ctx context.Context, cfg Config) error {
 	}()
 	mongoDb := mongoClient.Database(mongo.Database)
 
-	measurementsRepository, err := mongo.NewMeasurementsRepository(obs, mongoDb)
+	measurementsRepository, err := mongodb.NewMeasurementsRepository(obs, mongoDb)
 	if err != nil {
 		return err
 	}
@@ -100,7 +102,7 @@ func Run(ctx context.Context, cfg Config) error {
 	defer rabbitMqConn.Close()
 
 	// Create rabbitmq consumer
-	consumer, err := amqp.NewHandler(obs, rabbitMqConn, consumerService)
+	consumer, err := rabbitmq.NewHandler(obs, rabbitMqConn, consumerService)
 	if err != nil {
 		return err
 	}
@@ -122,11 +124,11 @@ func Run(ctx context.Context, cfg Config) error {
 	router := httpServer.Router()
 
 	// Asset handler
-	handler := http.NewAssetGinHandler(assetService)
+	handler := http2.NewAssetGinHandler(assetService)
 	handler.RegisterRoutes(router)
 
 	// Measurements handler
-	measurementsGinHandler := http.NewMeasurementsGinHandler(measurementsService)
+	measurementsGinHandler := http2.NewMeasurementsGinHandler(measurementsService)
 	measurementsGinHandler.RegisterRoutes(router)
 
 	go func() {

@@ -91,6 +91,44 @@ func (s *SimulatorConfigurationRepository) GetConfigurations(ctx context.Context
 	return configs, nil
 }
 
+func (s *SimulatorConfigurationRepository) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) error {
+	ctx, cancel := s.obs.Span(ctx, "configuration.repository.CreateConfiguration", zap.Any("configuration", configuration))
+	defer cancel()
+
+	dbConfig := toDBConfiguration(configuration)
+	result := s.db.WithContext(ctx).Create(&dbConfig)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (s *SimulatorConfigurationRepository) UpdateConfiguration(ctx context.Context, configuration simulator.Configuration) error {
+	ctx, cancel := s.obs.Span(ctx, "configuration.repository.UpdateConfiguration", zap.Any("configuration", configuration))
+	defer cancel()
+
+	dbConfig := toDBConfiguration(configuration)
+	result := s.db.WithContext(ctx).Updates(&dbConfig)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
+func (s *SimulatorConfigurationRepository) DeleteConfiguration(ctx context.Context, configurationId string) error {
+	ctx, cancel := s.obs.Span(ctx, "configuration.repository.DeleteConfiguration", zap.String("configurationId", configurationId))
+	defer cancel()
+
+	result := s.db.WithContext(ctx).Delete(&SimulatorConfiguration{ID: configurationId})
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 func toDBConfiguration(config simulator.Configuration) SimulatorConfiguration {
 	return SimulatorConfiguration{
 		Version:             config.Version,

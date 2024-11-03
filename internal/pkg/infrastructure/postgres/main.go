@@ -1,6 +1,8 @@
 package postgres
 
 import (
+	postgres3 "asset-measurements-assignment/internal/asset-service/postgres"
+	postgres2 "asset-measurements-assignment/internal/simulator/postgres"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 	"github.com/xBlaz3kx/DevX/observability"
@@ -32,7 +34,7 @@ func Connect(obs observability.Observability, connectionString string) (*gorm.DB
 
 	// To consider: If not persisted in the same database, this migration should happen in main.go
 	// Migrate the schemas
-	err = db.AutoMigrate(&Asset{}, &SimulatorConfiguration{})
+	err = db.AutoMigrate(&postgres3.Asset{}, &postgres2.SimulatorConfiguration{})
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to migrate schemas")
 	}

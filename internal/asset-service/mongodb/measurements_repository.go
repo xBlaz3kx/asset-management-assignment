@@ -1,4 +1,4 @@
-package mongo
+package mongodb
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"asset-measurements-assignment/internal/domain/measurements"
+	mongo2 "asset-measurements-assignment/internal/pkg/infrastructure/mongo"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
@@ -35,7 +36,7 @@ func NewMeasurementsRepository(obs observability.Observability, client *mongo.Da
 		SetGranularity("seconds")
 	opts := options.CreateCollection().SetTimeSeriesOptions(tso)
 
-	// We will just ignore for now :)
+	// We will just ignore the error for now :)
 	_ = client.CreateCollection(context.Background(), collectionName, opts)
 
 	return &MeasurementsRepository{
@@ -141,7 +142,7 @@ func (m *MeasurementsRepository) GetAssetMeasurementsAveraged(ctx context.Contex
 	}
 
 	// Determine group by instruction
-	dateTruncParams, err := groupDateInterval(params.GroupBy)
+	dateTruncParams, err := mongo2.GroupDateInterval(params.GroupBy)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +158,7 @@ func (m *MeasurementsRepository) GetAssetMeasurementsAveraged(ctx context.Contex
 		}},
 	}
 
-	val, err := sortBy(params.Sort)
+	val, err := mongo2.SortBy(params.Sort)
 	if err != nil {
 		return nil, err
 	}
