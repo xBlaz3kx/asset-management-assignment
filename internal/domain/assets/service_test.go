@@ -3,7 +3,6 @@ package assets
 import (
 	"testing"
 
-	assetMocks "asset-measurements-assignment/internal/domain/assets/mocks"
 	"github.com/stretchr/testify/suite"
 	"github.com/xBlaz3kx/DevX/observability"
 )
@@ -11,11 +10,11 @@ import (
 type assetServiceTestSuite struct {
 	suite.Suite
 	service        Service
-	repositoryMock *assetMocks.MockRepository
+	repositoryMock *MockRepository
 }
 
 func (s *assetServiceTestSuite) SetupTest() {
-	s.repositoryMock = assetMocks.NewMockRepository(s.T())
+	s.repositoryMock = NewMockRepository(s.T())
 	s.service = NewService(observability.NewNoopObservability(), s.repositoryMock)
 }
 

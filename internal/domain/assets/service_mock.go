@@ -3,7 +3,6 @@
 package assets
 
 import (
-	assets "asset-measurements-assignment/internal/domain/assets"
 	context "context"
 
 	mock "github.com/stretchr/testify/mock"
@@ -23,7 +22,7 @@ func (_m *MockService) EXPECT() *MockService_Expecter {
 }
 
 // CreateAsset provides a mock function with given fields: ctx, asset
-func (_m *MockService) CreateAsset(ctx context.Context, asset assets.Asset) error {
+func (_m *MockService) CreateAsset(ctx context.Context, asset Asset) error {
 	ret := _m.Called(ctx, asset)
 
 	if len(ret) == 0 {
@@ -31,7 +30,7 @@ func (_m *MockService) CreateAsset(ctx context.Context, asset assets.Asset) erro
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, assets.Asset) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, Asset) error); ok {
 		r0 = rf(ctx, asset)
 	} else {
 		r0 = ret.Error(0)
@@ -47,14 +46,14 @@ type MockService_CreateAsset_Call struct {
 
 // CreateAsset is a helper method to define mock.On call
 //   - ctx context.Context
-//   - asset assets.Asset
+//   - asset Asset
 func (_e *MockService_Expecter) CreateAsset(ctx interface{}, asset interface{}) *MockService_CreateAsset_Call {
 	return &MockService_CreateAsset_Call{Call: _e.mock.On("CreateAsset", ctx, asset)}
 }
 
-func (_c *MockService_CreateAsset_Call) Run(run func(ctx context.Context, asset assets.Asset)) *MockService_CreateAsset_Call {
+func (_c *MockService_CreateAsset_Call) Run(run func(ctx context.Context, asset Asset)) *MockService_CreateAsset_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(assets.Asset))
+		run(args[0].(context.Context), args[1].(Asset))
 	})
 	return _c
 }
@@ -64,7 +63,7 @@ func (_c *MockService_CreateAsset_Call) Return(_a0 error) *MockService_CreateAss
 	return _c
 }
 
-func (_c *MockService_CreateAsset_Call) RunAndReturn(run func(context.Context, assets.Asset) error) *MockService_CreateAsset_Call {
+func (_c *MockService_CreateAsset_Call) RunAndReturn(run func(context.Context, Asset) error) *MockService_CreateAsset_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -117,23 +116,23 @@ func (_c *MockService_DeleteAsset_Call) RunAndReturn(run func(context.Context, s
 }
 
 // GetAsset provides a mock function with given fields: ctx, assetId
-func (_m *MockService) GetAsset(ctx context.Context, assetId string) (*assets.Asset, error) {
+func (_m *MockService) GetAsset(ctx context.Context, assetId string) (*Asset, error) {
 	ret := _m.Called(ctx, assetId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAsset")
 	}
 
-	var r0 *assets.Asset
+	var r0 *Asset
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) (*assets.Asset, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) (*Asset, error)); ok {
 		return rf(ctx, assetId)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, string) *assets.Asset); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string) *Asset); ok {
 		r0 = rf(ctx, assetId)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*assets.Asset)
+			r0 = ret.Get(0).(*Asset)
 		}
 	}
 
@@ -165,38 +164,38 @@ func (_c *MockService_GetAsset_Call) Run(run func(ctx context.Context, assetId s
 	return _c
 }
 
-func (_c *MockService_GetAsset_Call) Return(_a0 *assets.Asset, _a1 error) *MockService_GetAsset_Call {
+func (_c *MockService_GetAsset_Call) Return(_a0 *Asset, _a1 error) *MockService_GetAsset_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockService_GetAsset_Call) RunAndReturn(run func(context.Context, string) (*assets.Asset, error)) *MockService_GetAsset_Call {
+func (_c *MockService_GetAsset_Call) RunAndReturn(run func(context.Context, string) (*Asset, error)) *MockService_GetAsset_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // GetAssets provides a mock function with given fields: ctx, query
-func (_m *MockService) GetAssets(ctx context.Context, query assets.AssetQuery) ([]assets.Asset, error) {
+func (_m *MockService) GetAssets(ctx context.Context, query AssetQuery) ([]Asset, error) {
 	ret := _m.Called(ctx, query)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetAssets")
 	}
 
-	var r0 []assets.Asset
+	var r0 []Asset
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, assets.AssetQuery) ([]assets.Asset, error)); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, AssetQuery) ([]Asset, error)); ok {
 		return rf(ctx, query)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context, assets.AssetQuery) []assets.Asset); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, AssetQuery) []Asset); ok {
 		r0 = rf(ctx, query)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]assets.Asset)
+			r0 = ret.Get(0).([]Asset)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context, assets.AssetQuery) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, AssetQuery) error); ok {
 		r1 = rf(ctx, query)
 	} else {
 		r1 = ret.Error(1)
@@ -212,30 +211,30 @@ type MockService_GetAssets_Call struct {
 
 // GetAssets is a helper method to define mock.On call
 //   - ctx context.Context
-//   - query assets.AssetQuery
+//   - query AssetQuery
 func (_e *MockService_Expecter) GetAssets(ctx interface{}, query interface{}) *MockService_GetAssets_Call {
 	return &MockService_GetAssets_Call{Call: _e.mock.On("GetAssets", ctx, query)}
 }
 
-func (_c *MockService_GetAssets_Call) Run(run func(ctx context.Context, query assets.AssetQuery)) *MockService_GetAssets_Call {
+func (_c *MockService_GetAssets_Call) Run(run func(ctx context.Context, query AssetQuery)) *MockService_GetAssets_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(assets.AssetQuery))
+		run(args[0].(context.Context), args[1].(AssetQuery))
 	})
 	return _c
 }
 
-func (_c *MockService_GetAssets_Call) Return(_a0 []assets.Asset, _a1 error) *MockService_GetAssets_Call {
+func (_c *MockService_GetAssets_Call) Return(_a0 []Asset, _a1 error) *MockService_GetAssets_Call {
 	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockService_GetAssets_Call) RunAndReturn(run func(context.Context, assets.AssetQuery) ([]assets.Asset, error)) *MockService_GetAssets_Call {
+func (_c *MockService_GetAssets_Call) RunAndReturn(run func(context.Context, AssetQuery) ([]Asset, error)) *MockService_GetAssets_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
 // UpdateAsset provides a mock function with given fields: ctx, assetId, asset
-func (_m *MockService) UpdateAsset(ctx context.Context, assetId string, asset assets.Asset) error {
+func (_m *MockService) UpdateAsset(ctx context.Context, assetId string, asset Asset) error {
 	ret := _m.Called(ctx, assetId, asset)
 
 	if len(ret) == 0 {
@@ -243,7 +242,7 @@ func (_m *MockService) UpdateAsset(ctx context.Context, assetId string, asset as
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, assets.Asset) error); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, string, Asset) error); ok {
 		r0 = rf(ctx, assetId, asset)
 	} else {
 		r0 = ret.Error(0)
@@ -260,14 +259,14 @@ type MockService_UpdateAsset_Call struct {
 // UpdateAsset is a helper method to define mock.On call
 //   - ctx context.Context
 //   - assetId string
-//   - asset assets.Asset
+//   - asset Asset
 func (_e *MockService_Expecter) UpdateAsset(ctx interface{}, assetId interface{}, asset interface{}) *MockService_UpdateAsset_Call {
 	return &MockService_UpdateAsset_Call{Call: _e.mock.On("UpdateAsset", ctx, assetId, asset)}
 }
 
-func (_c *MockService_UpdateAsset_Call) Run(run func(ctx context.Context, assetId string, asset assets.Asset)) *MockService_UpdateAsset_Call {
+func (_c *MockService_UpdateAsset_Call) Run(run func(ctx context.Context, assetId string, asset Asset)) *MockService_UpdateAsset_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string), args[2].(assets.Asset))
+		run(args[0].(context.Context), args[1].(string), args[2].(Asset))
 	})
 	return _c
 }
@@ -277,7 +276,7 @@ func (_c *MockService_UpdateAsset_Call) Return(_a0 error) *MockService_UpdateAss
 	return _c
 }
 
-func (_c *MockService_UpdateAsset_Call) RunAndReturn(run func(context.Context, string, assets.Asset) error) *MockService_UpdateAsset_Call {
+func (_c *MockService_UpdateAsset_Call) RunAndReturn(run func(context.Context, string, Asset) error) *MockService_UpdateAsset_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -21,7 +21,7 @@ type service struct {
 }
 
 func (s *service) CreateAsset(ctx context.Context, asset Asset) error {
-	ctx, cancel, logger := s.obs.LogSpan(ctx, "assets.service.CreateAsset")
+	ctx, cancel, logger := s.obs.LogSpan(ctx, "assets.service.CreateAssetConfig")
 	defer cancel()
 	logger.Info("Creating asset", zap.Any("asset", asset))
 
