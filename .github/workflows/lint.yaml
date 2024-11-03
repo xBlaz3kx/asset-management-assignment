@@ -1,10 +1,15 @@
 name: "Lint"
 on:
   pull_request:
+    types: [ opened, synchronize ]
+    branches:
+      - main
+      - master
   push:
     branches:
       - main
       - master
+
 jobs:
   golangci-lint:
     name: runner / golangci-lint

@@ -8,7 +8,17 @@ on:
     paths-ignore:
       - 'docs/**'
       - 'api/**'
-      - 'deployments/**'
+      - 'deployment/**'
+      - '*.md'
+  push:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - 'build/**'
+      - 'docs/**'
+      - 'api/**'
+      - 'deployment/**'
       - '*.md'
 
   workflow_dispatch:

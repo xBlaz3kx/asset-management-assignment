@@ -5,10 +5,7 @@ on:
       - main
       - master
     paths-ignore:
-      - 'docs/**'
-      - 'api/**'
-      - 'config/**'
-      - 'deployments/**'
+      - 'deployment/**'
       - '*.md'
     tags:
       - v*
@@ -18,9 +15,7 @@ on:
     branches:
       - main
     paths-ignore:
-      - 'docs/**'
-      - 'api/**'
-      - 'deployments/**'
+      - 'deployment/**'
       - '*.md'
   workflow_dispatch:
 
