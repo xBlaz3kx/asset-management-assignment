@@ -41,7 +41,11 @@ func (m *measurementsService) GetAssetMeasurements(ctx context.Context, assetID 
 	defer cancel()
 	logger.Info("Getting latest asset measurement")
 
-	// todo Validate time range
+	err := timeRange.Validate()
+	if err != nil {
+		logger.With(zap.Error(err)).Error("Invalid time range")
+		return nil, err
+	}
 
 	measurement, err := m.repository.GetAssetMeasurements(ctx, assetID, timeRange)
 	if err != nil {
