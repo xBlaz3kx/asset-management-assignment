@@ -8,10 +8,10 @@ import (
 
 func TestCalculateStateOfEnergy(t *testing.T) {
 	tests := []struct {
-		name        string
-		measurement Measurement
-		maxPower    Power
-		expected    float32
+		name                string
+		measurement         Measurement
+		previousMeasurement Measurement
+		expected            float32
 	}{
 		{
 			name: "20% energy",
@@ -21,8 +21,10 @@ func TestCalculateStateOfEnergy(t *testing.T) {
 					Unit:  UnitWatt,
 				},
 			},
-			maxPower: Power{
-				Value: 100.0,
+			previousMeasurement: Measurement{
+				Power: Power{
+					Value: 100.0,
+				},
 			},
 			expected: 20.0,
 		},
@@ -34,8 +36,10 @@ func TestCalculateStateOfEnergy(t *testing.T) {
 					Unit:  UnitWatt,
 				},
 			},
-			maxPower: Power{
-				Value: 100.0,
+			previousMeasurement: Measurement{
+				Power: Power{
+					Value: 100.0,
+				},
 			},
 			expected: 50.0,
 		},
@@ -47,8 +51,10 @@ func TestCalculateStateOfEnergy(t *testing.T) {
 					Unit:  UnitWatt,
 				},
 			},
-			maxPower: Power{
-				Value: 100.0,
+			previousMeasurement: Measurement{
+				Power: Power{
+					Value: 100.0,
+				},
 			},
 			expected: 0.0,
 		},
@@ -60,8 +66,10 @@ func TestCalculateStateOfEnergy(t *testing.T) {
 					Unit:  UnitWatt,
 				},
 			},
-			maxPower: Power{
-				Value: 100.0,
+			previousMeasurement: Measurement{
+				Power: Power{
+					Value: 100.0,
+				},
 			},
 			expected: 100.0,
 		},
@@ -69,75 +77,8 @@ func TestCalculateStateOfEnergy(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.measurement.CalculateStateOfEnergy(tt.maxPower)
+			tt.measurement.CalculateStateOfEnergy(tt.previousMeasurement)
 			assert.InDelta(t, tt.expected, tt.measurement.StateOfEnergy, 0.001)
-		})
-	}
-}
-
-func TestNewRandomMeasurement(t *testing.T) {
-	t.Skip("Not implemented")
-
-	tests := []struct {
-		name         string
-		minPower     Power
-		maxPower     Power
-		maxPowerStep float64
-		expected     Measurement
-		err          bool
-	}{
-		{
-			name: "Random measurement",
-			minPower: Power{
-				Value: 0,
-				Unit:  UnitWatt,
-			},
-			maxPower: Power{
-				Value: 100,
-				Unit:  UnitWatt,
-			},
-			maxPowerStep: 10,
-		},
-		{
-			name: "Unlimited power step",
-			minPower: Power{
-				Value: 0,
-				Unit:  UnitWatt,
-			},
-			maxPower: Power{
-				Value: 100,
-				Unit:  UnitWatt,
-			},
-			maxPowerStep: -1,
-		},
-		{
-			name: "Invalid max power",
-			minPower: Power{
-				Value: 100,
-				Unit:  UnitWatt,
-			},
-			maxPower: Power{
-				Value: 0,
-				Unit:  UnitWatt,
-			},
-			maxPowerStep: 10,
-		},
-		{
-			name: "Invalid min power",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			actual, err := NewRandomMeasurement(tt.minPower, tt.maxPower, tt.maxPowerStep)
-			if tt.err {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.NotNil(t, actual)
-				assert.Equal(t, tt.minPower.Unit, actual.Power.Unit)
-				assert.InDelta(t, tt.minPower.Value, actual.Power.Value, tt.maxPowerStep)
-			}
 		})
 	}
 }
