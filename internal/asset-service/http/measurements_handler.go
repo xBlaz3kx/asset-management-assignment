@@ -35,20 +35,17 @@ func (d *MeasurementsGinHandler) GetLatest(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, assetMeasurement)
 }
 
-type AveragedQueryParams struct {
-}
-
 func (d *MeasurementsGinHandler) GetAvgWithinTimeInterval(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
 
-	var query measurements.AssetMeasurementAveragedParams
+	var query AssetMeasurementAveragedParams
 	if err := ctx.ShouldBindQuery(&query); err != nil {
 		ctx.JSON(badRequest(err))
 		return
 	}
 
-	assetMeasurementsAveraged, err := d.service.GetAssetMeasurementsAveraged(reqCtx, assetId, query)
+	assetMeasurementsAveraged, err := d.service.GetAssetMeasurementsAveraged(reqCtx, assetId, query.toDomainModel())
 	if err != nil {
 		_ = ctx.Error(err)
 		return
@@ -61,13 +58,13 @@ func (d *MeasurementsGinHandler) GetWithinTimeInterval(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
 
-	var query measurements.TimeRange
+	var query TimeRange
 	if err := ctx.ShouldBindQuery(&query); err != nil {
 		ctx.JSON(badRequest(err))
 		return
 	}
 
-	assetMeasurements, err := d.service.GetAssetMeasurements(reqCtx, assetId, query)
+	assetMeasurements, err := d.service.GetAssetMeasurements(reqCtx, assetId, query.toDomainModel())
 	if err != nil {
 		_ = ctx.Error(err)
 		return

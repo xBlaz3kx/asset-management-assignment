@@ -33,37 +33,57 @@ func (d *AssetGinHandler) GetAssetById(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, getAsset)
+	ctx.JSON(http.StatusOK, d.toAsset(*getAsset))
 }
 
 func (d *AssetGinHandler) GetAssets(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 
-	var query assets.AssetQuery
+	var query GetAssetQuery
 	if err := ctx.ShouldBindQuery(&query); err != nil {
 		ctx.JSON(badRequest(err))
 		return
 	}
 
-	getAssets, err := d.service.GetAssets(reqCtx, query)
+	getAssets, err := d.service.GetAssets(reqCtx, query.ToAssetQuery())
 	if err != nil {
 		_ = ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, getAssets)
+	// Map to API model
+	ctx.JSON(http.StatusOK, d.toApiModels(getAssets))
+}
+
+func (d *AssetGinHandler) toApiModels(getAssets []assets.Asset) []Asset {
+	var response []Asset
+	for _, asset := range getAssets {
+		response = append(response, d.toAsset(asset))
+	}
+
+	return response
+}
+
+func (d *AssetGinHandler) toAsset(asset assets.Asset) Asset {
+	return Asset{
+		Id:          asset.ID,
+		Name:        asset.Name,
+		Description: asset.Description,
+		Type:        string(asset.Type),
+		Enabled:     asset.Enabled,
+	}
 }
 
 func (d *AssetGinHandler) CreateAsset(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 
-	var asset assets.Asset
-	if err := ctx.ShouldBindJSON(&asset); err != nil {
+	var req CreateAssetRequest
+	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(badRequest(err))
 		return
 	}
 
-	err := d.service.CreateAsset(reqCtx, asset)
+	err := d.service.CreateAsset(reqCtx, req.toDomainAsset())
 	if err != nil {
 		_ = ctx.Error(err)
 		return
@@ -76,13 +96,13 @@ func (d *AssetGinHandler) UpdateAsset(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
 
-	var asset assets.Asset
-	if err := ctx.ShouldBindJSON(&asset); err != nil {
+	var request UpdateAssetRequest
+	if err := ctx.ShouldBindJSON(&request); err != nil {
 		ctx.JSON(badRequest(err))
 		return
 	}
 
-	err := d.service.UpdateAsset(reqCtx, assetId, asset)
+	err := d.service.UpdateAsset(reqCtx, assetId, request.toAsset(assetId))
 	if err != nil {
 		_ = ctx.Error(err)
 		return
