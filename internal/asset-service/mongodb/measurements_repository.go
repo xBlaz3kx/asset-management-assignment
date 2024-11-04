@@ -120,7 +120,7 @@ func (m *MeasurementsRepository) GetAssetMeasurements(ctx context.Context, asset
 }
 
 // Aggregation pipeline result
-type AveragedMeasurement struct {
+type averagedMeasurement struct {
 	ID            time.Time `bson:"_id"`
 	PowerAvg      float64   `bson:"power"`
 	StateOfEnergy float64   `bson:"SoE"`
@@ -180,7 +180,7 @@ func (m *MeasurementsRepository) GetAssetMeasurementsAveraged(ctx context.Contex
 		return nil, err
 	}
 
-	var dbMeasurements []AveragedMeasurement
+	var dbMeasurements []averagedMeasurement
 	err = cursor.All(ctx, &dbMeasurements)
 	if err != nil {
 		return nil, err
@@ -197,7 +197,7 @@ func toMeasurement(measurement *Measurement) *measurements.Measurement {
 	}
 }
 
-func toMeasurementsFromAverage(m []AveragedMeasurement) []measurements.Measurement {
+func toMeasurementsFromAverage(m []averagedMeasurement) []measurements.Measurement {
 	result := make([]measurements.Measurement, len(m))
 	for i, measurement := range m {
 		result[i] = measurements.Measurement{
