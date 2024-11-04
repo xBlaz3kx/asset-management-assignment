@@ -16,8 +16,8 @@ func NewSimulatorConfigHandler(service simulator.ConfigService) *SimulatorConfig
 }
 
 func (d *SimulatorConfigHandler) RegisterRoutes(router *gin.Engine) {
-	router.POST("/assets/:id/config", d.CreateAssetConfig)
-	router.GET("/assets/:id/config", d.GetCurrentAssetConfig)
+	router.POST("/assets/:assetId/config", d.CreateAssetConfig)
+	router.GET("/assets/:assetId/config", d.GetCurrentAssetConfig)
 	router.DELETE("/assets/:assetId/config/:configId", d.DeleteConfiguration)
 }
 

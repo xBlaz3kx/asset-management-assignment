@@ -64,7 +64,12 @@ func (c *configService) CreateConfiguration(ctx context.Context, configuration s
 	defer cancel()
 	logger.Info("Creating configuration", zap.Any("configuration", configuration))
 
-	err := c.repository.CreateConfiguration(ctx, configuration)
+	err := configuration.Validate()
+	if err != nil {
+		return err
+	}
+
+	err = c.repository.CreateConfiguration(ctx, configuration)
 	if err != nil {
 		return err
 	}
