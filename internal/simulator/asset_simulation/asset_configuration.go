@@ -28,7 +28,13 @@ func (c *Configuration) Validate() error {
 	switch c.Type {
 	case "battery":
 	case "solar":
+		if c.MinPower > 0.0 || c.MaxPower > 0.0 {
+			return errors.New("minPower and maxPower must be negative for solar assets")
+		}
 	case "wind":
+		if c.MinPower > 0.0 || c.MaxPower > 0.0 {
+			return errors.New("minPower and maxPower must be negative for wind assets")
+		}
 	default:
 		return fmt.Errorf("unsupported asset type: %s", c.Type)
 	}

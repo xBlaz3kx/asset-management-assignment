@@ -22,6 +22,100 @@ func (_m *MockRepository) EXPECT() *MockRepository_Expecter {
 	return &MockRepository_Expecter{mock: &_m.Mock}
 }
 
+// CreateConfiguration provides a mock function with given fields: ctx, configuration
+func (_m *MockRepository) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) error {
+	ret := _m.Called(ctx, configuration)
+
+	if len(ret) == 0 {
+		panic("no return value specified for CreateConfiguration")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, simulator.Configuration) error); ok {
+		r0 = rf(ctx, configuration)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockRepository_CreateConfiguration_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateConfiguration'
+type MockRepository_CreateConfiguration_Call struct {
+	*mock.Call
+}
+
+// CreateConfiguration is a helper method to define mock.On call
+//   - ctx context.Context
+//   - configuration simulator.Configuration
+func (_e *MockRepository_Expecter) CreateConfiguration(ctx interface{}, configuration interface{}) *MockRepository_CreateConfiguration_Call {
+	return &MockRepository_CreateConfiguration_Call{Call: _e.mock.On("CreateConfiguration", ctx, configuration)}
+}
+
+func (_c *MockRepository_CreateConfiguration_Call) Run(run func(ctx context.Context, configuration simulator.Configuration)) *MockRepository_CreateConfiguration_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(simulator.Configuration))
+	})
+	return _c
+}
+
+func (_c *MockRepository_CreateConfiguration_Call) Return(_a0 error) *MockRepository_CreateConfiguration_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockRepository_CreateConfiguration_Call) RunAndReturn(run func(context.Context, simulator.Configuration) error) *MockRepository_CreateConfiguration_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// DeleteConfiguration provides a mock function with given fields: ctx, configurationId
+func (_m *MockRepository) DeleteConfiguration(ctx context.Context, configurationId string) error {
+	ret := _m.Called(ctx, configurationId)
+
+	if len(ret) == 0 {
+		panic("no return value specified for DeleteConfiguration")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
+		r0 = rf(ctx, configurationId)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockRepository_DeleteConfiguration_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'DeleteConfiguration'
+type MockRepository_DeleteConfiguration_Call struct {
+	*mock.Call
+}
+
+// DeleteConfiguration is a helper method to define mock.On call
+//   - ctx context.Context
+//   - configurationId string
+func (_e *MockRepository_Expecter) DeleteConfiguration(ctx interface{}, configurationId interface{}) *MockRepository_DeleteConfiguration_Call {
+	return &MockRepository_DeleteConfiguration_Call{Call: _e.mock.On("DeleteConfiguration", ctx, configurationId)}
+}
+
+func (_c *MockRepository_DeleteConfiguration_Call) Run(run func(ctx context.Context, configurationId string)) *MockRepository_DeleteConfiguration_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(string))
+	})
+	return _c
+}
+
+func (_c *MockRepository_DeleteConfiguration_Call) Return(_a0 error) *MockRepository_DeleteConfiguration_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockRepository_DeleteConfiguration_Call) RunAndReturn(run func(context.Context, string) error) *MockRepository_DeleteConfiguration_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetAssetConfiguration provides a mock function with given fields: ctx, assetId
 func (_m *MockRepository) GetAssetConfiguration(ctx context.Context, assetId string) (*simulator.Configuration, error) {
 	ret := _m.Called(ctx, assetId)

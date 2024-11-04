@@ -12,6 +12,7 @@ type AssetSimulator interface {
 	Start(ctx context.Context) error
 	Stop() error
 	GetId() string
+	IsRunning() bool
 }
 
 type AssetSimulatorManager struct {
@@ -28,6 +29,35 @@ func NewAssetSimulatorManager(obs observability.Observability) *AssetSimulatorMa
 	}
 }
 
+// AddAndStartWorker adds a worker to the manager and starts it
+func (wm *AssetSimulatorManager) AddAndStartWorker(ctx context.Context, worker AssetSimulator) {
+	wm.mu.Lock()
+	defer wm.mu.Unlock()
+	wm.obs.Log().Debug("Adding worker", zap.String("workerId", worker.GetId()))
+
+	// Stop the worker and remove it
+	previousWorker, ok := wm.workers[worker.GetId()]
+	if ok && previousWorker.IsRunning() {
+		err := previousWorker.Stop()
+		if err != nil {
+			wm.obs.Log().With(zap.Error(err)).Error("Unable to stop worker")
+		}
+	}
+
+	// Start worker in a goroutine
+	wm.workers[worker.GetId()] = worker
+	wm.wg.Add(1)
+	go func() {
+		defer wm.wg.Done()
+
+		wm.obs.Log().Debug("Starting worker", zap.String("workerId", worker.GetId()))
+		err := worker.Start(ctx)
+		if err != nil {
+			wm.obs.Log().With(zap.Error(err)).Error("Unable to start worker")
+		}
+	}()
+}
+
 // AddWorker adds a worker to the manager
 func (wm *AssetSimulatorManager) AddWorker(worker AssetSimulator) {
 	wm.mu.Lock()
@@ -42,6 +72,15 @@ func (wm *AssetSimulatorManager) RemoveWorker(workerId string) {
 	wm.mu.Lock()
 	defer wm.mu.Unlock()
 	wm.obs.Log().Debug("Removing worker", zap.String("workerId", workerId))
+
+	// Stop the worker before removing it
+	worker, ok := wm.workers[workerId]
+	if ok && worker.IsRunning() {
+		err := worker.Stop()
+		if err != nil {
+			wm.obs.Log().With(zap.Error(err)).Error("Unable to stop worker")
+		}
+	}
 
 	delete(wm.workers, workerId)
 }
@@ -74,6 +113,8 @@ func (wm *AssetSimulatorManager) StartWorkers(ctx context.Context) {
 		// Start worker in a goroutine
 		go func() {
 			defer wm.wg.Done()
+
+			wm.obs.Log().Debug("Starting worker", zap.String("workerId", worker.GetId()))
 			err := worker.Start(ctx)
 			if err != nil {
 				wm.obs.Log().With(zap.Error(err)).Error("Unable to start worker")

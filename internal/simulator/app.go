@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
-	"asset-measurements-assignment/internal/domain/simulator"
+	"asset-measurements-assignment/internal/domain/simulator/service"
 	"asset-measurements-assignment/internal/pkg/infrastructure/postgres"
 	assetSimulation "asset-measurements-assignment/internal/simulator/asset_simulation"
+	"asset-measurements-assignment/internal/simulator/http"
 	postgres2 "asset-measurements-assignment/internal/simulator/postgres"
 	"asset-measurements-assignment/internal/simulator/rabbitmq"
 	"github.com/GLCharge/otelzap"
@@ -73,11 +74,8 @@ func Run(ctx context.Context, cfg Config) error {
 	// Create new simulator configuration repository
 	configRepository := postgres2.NewSimulatorConfigurationRepository(obs, postgresDb)
 
-	// Fetch assets from Postgres
-	configs, err := configRepository.GetConfigurations(ctx)
-	if err != nil {
-		return err
-	}
+	// Create new asset simulator worker manager
+	workerManager := assetSimulation.NewAssetSimulatorManager(obs)
 
 	// Create measurements publisher
 	measurementPublisher, err := rabbitmq.NewMeasurementPublisher(obs, rabbitmqConn)
@@ -85,17 +83,20 @@ func Run(ctx context.Context, cfg Config) error {
 		return err
 	}
 
-	// Create new asset simulator worker manager
-	workerManager := assetSimulation.NewAssetSimulatorManager(obs)
-
-	// Add workers based on fetched configurations
-	createWorkersFromConfigurations(obs, workerManager, configs, measurementPublisher)
-
-	// Start asset simulator workers
-	workerManager.StartWorkers(ctx)
+	// Create new asset configuration service
+	configService := service.NewConfigService(obs, configRepository, workerManager, measurementPublisher)
+	err = configService.StartWorkersFromDatabaseConfigurations(ctx)
+	if err != nil {
+		// Log error and continue
+		obs.Log().With(zap.Error(err)).Error("Failed to start workers from database configurations")
+	}
 
 	// Create HTTP server for healthchecks
 	httpServer := devxHttp.NewServer(devxHttp.Configuration{Address: ":80"}, obs)
+	router := httpServer.Router()
+	configHandler := http.NewSimulatorConfigHandler(configService)
+	configHandler.RegisterRoutes(router)
+
 	go func() {
 		httpServer.Run()
 	}()
@@ -105,30 +106,4 @@ func Run(ctx context.Context, cfg Config) error {
 	workerManager.StopAll()
 
 	return nil
-}
-
-func createWorkersFromConfigurations(
-	obs observability.Observability,
-	workerManager *assetSimulation.AssetSimulatorManager,
-	configs []simulator.Configuration,
-	measurementPublisher *rabbitmq.MeasurementPublisher,
-) {
-	for _, config := range configs {
-
-		configuration := assetSimulation.Configuration{
-			AssetId:             config.AssetId,
-			MinPower:            config.MinPower,
-			MaxPower:            config.MaxPower,
-			MaxPowerStep:        config.MaxPowerStep,
-			MeasurementInterval: config.MeasurementInterval,
-		}
-
-		worker, err := assetSimulation.NewSimpleAssetSimulator(obs, configuration, measurementPublisher)
-		if err != nil {
-			obs.Log().Error("Failed to create worker", zap.Error(err))
-			continue
-		}
-
-		workerManager.AddWorker(worker)
-	}
 }
