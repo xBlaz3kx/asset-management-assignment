@@ -19,8 +19,8 @@ type Power struct {
 
 type AssetMeasurementAveragedParams struct {
 	TimeRange
-	GroupBy string `form:"groupBy" binding:"required,oneof=minute,hour,15min"`
-	Sort    string `form:"sort" binding:"required"`
+	GroupBy string `form:"groupBy" binding:"required,oneof=minute hour 15min"`
+	Sort    string `form:"sort" binding:"required,oneof=asc desc"`
 }
 
 func (a *AssetMeasurementAveragedParams) toDomainModel() measurements.AssetMeasurementAveragedParams {
