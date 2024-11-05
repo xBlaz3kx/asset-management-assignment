@@ -26,15 +26,16 @@ func (c *Configuration) Validate() error {
 	}
 
 	// Validate min and max power based on asset type
-	switch c.Type {
-	case "battery":
-	case "solar":
-		if c.MinPower > 0.0 || c.MaxPower > 0.0 {
-			return errors.New("minPower and maxPower must be negative for solar assets")
+	switch c.Type.GetEnergyType() {
+	case domain.EnergyTypeCombined:
+	case domain.EnergyTypeConsumer:
+		// Must be positive
+		if c.MinPower < 0.0 || c.MaxPower < 0.0 {
+			return errors.New("minPower and maxPower must be positive for consumer assets")
 		}
-	case "wind":
+	case domain.EnergyTypeProducer:
 		if c.MinPower > 0.0 || c.MaxPower > 0.0 {
-			return errors.New("minPower and maxPower must be negative for wind assets")
+			return errors.New("minPower and maxPower must be negative for producer assets")
 		}
 	default:
 		return fmt.Errorf("unsupported asset type: %s", c.Type)
