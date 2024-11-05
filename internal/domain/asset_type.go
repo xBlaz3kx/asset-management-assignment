@@ -11,13 +11,16 @@ const (
 type AssetType string
 
 const (
-	AssetTypeBattery      = AssetType("battery")
+	// Combined
+	AssetTypeBattery = AssetType("battery")
+	// Consumers
+	AssetTypeMotor  = AssetType("motor")
+	AssetTypeHeater = AssetType("heater")
+	// Producers
 	AssetTypeSolar        = AssetType("solar")
 	AssetTypeWind         = AssetType("wind")
-	AssetTypeMotor        = AssetType("motor")
-	AssetTypeHeater       = AssetType("heater")
-	AssetTypeHeatTurbine  = AssetType("heatTurbine")
-	AssetTypeHydroTurbine = AssetType("hydroTurbine")
+	AssetTypeHeatTurbine  = AssetType("heat_turbine")
+	AssetTypeHydroTurbine = AssetType("hydro_turbine")
 )
 
 func IsValidAssetType(t AssetType) bool {
@@ -35,6 +38,7 @@ func (a AssetType) String() string {
 	return string(a)
 }
 
+// GetEnergyType returns the energy type based on asset type
 func (a AssetType) GetEnergyType() EnergyType {
 	switch a {
 	case AssetTypeBattery:
