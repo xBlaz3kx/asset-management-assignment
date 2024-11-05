@@ -1,6 +1,7 @@
 package simulator
 
 import (
+	"math"
 	"time"
 
 	"asset-measurements-assignment/internal/domain"
@@ -26,12 +27,12 @@ func (c *Configuration) Validate() error {
 	}
 
 	// Check if minPower is less than maxPower
-	if c.MinPower > c.MaxPower {
+	if math.Abs(c.MinPower) > math.Abs(c.MaxPower) {
 		return ErrMinPowerGreaterThanMaxPower
 	}
 
 	// Sanity check the measurement interval
-	if c.MeasurementInterval <= time.Millisecond*100 {
+	if c.MeasurementInterval < time.Millisecond*100 {
 		return errors.New("measurementInterval must be greater than 0")
 	}
 
