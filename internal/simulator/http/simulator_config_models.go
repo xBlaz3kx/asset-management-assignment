@@ -3,6 +3,7 @@ package http
 import (
 	"time"
 
+	"asset-measurements-assignment/internal/domain"
 	"asset-measurements-assignment/internal/domain/simulator"
 )
 
@@ -28,7 +29,7 @@ type CreateConfiguration struct {
 func (c CreateConfiguration) toDomainConfiguration(assetId string) simulator.Configuration {
 	cfg := simulator.Configuration{
 		AssetId:             assetId,
-		Type:                simulator.AssetType(c.Type),
+		Type:                domain.AssetType(c.Type),
 		MeasurementInterval: c.MeasurementInterval,
 		MaxPower:            c.MaxPower,
 		MinPower:            c.MinPower,

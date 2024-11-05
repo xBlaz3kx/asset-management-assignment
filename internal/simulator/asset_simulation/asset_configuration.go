@@ -5,17 +5,18 @@ import (
 	"math"
 	"time"
 
+	"asset-measurements-assignment/internal/domain"
 	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 )
 
 type Configuration struct {
-	AssetId             string        `json:"assetId" validate:"required,gte=1"`
-	Type                string        `json:"type" validate:"required,oneof=battery solar wind"`
-	MeasurementInterval time.Duration `json:"measurementInterval" validate:"required"`
-	MaxPower            float64       `json:"maxPower" validate:"required"`
-	MinPower            float64       `json:"minPower" validate:"required"`
-	MaxPowerStep        float64       `json:"maxPowerStep"`
+	AssetId             string           `json:"assetId" validate:"required,gte=1"`
+	Type                domain.AssetType `json:"type" validate:"required"`
+	MeasurementInterval time.Duration    `json:"measurementInterval" validate:"required"`
+	MaxPower            float64          `json:"maxPower" validate:"required"`
+	MinPower            float64          `json:"minPower" validate:"required"`
+	MaxPowerStep        float64          `json:"maxPowerStep"`
 }
 
 func (c *Configuration) Validate() error {

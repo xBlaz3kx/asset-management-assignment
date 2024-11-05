@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"asset-measurements-assignment/internal/domain"
 	"asset-measurements-assignment/internal/domain/assets"
 	"github.com/google/uuid"
 	"github.com/xBlaz3kx/DevX/observability"
@@ -137,7 +138,7 @@ func toDomainAsset(dbAsset Asset) assets.Asset {
 		ID:          dbAsset.ID,
 		Name:        dbAsset.Name,
 		Description: dbAsset.Description,
-		Type:        assets.AssetType(dbAsset.Type),
+		Type:        domain.AssetType(dbAsset.Type),
 		Enabled:     dbAsset.Enabled,
 	}
 }

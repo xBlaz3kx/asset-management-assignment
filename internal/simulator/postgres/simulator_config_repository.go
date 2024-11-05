@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"time"
 
+	"asset-measurements-assignment/internal/domain"
 	"asset-measurements-assignment/internal/domain/simulator"
 	"github.com/google/uuid"
 	"github.com/xBlaz3kx/DevX/observability"
@@ -155,7 +156,7 @@ func toConfiguration(dbConfig SimulatorConfiguration) simulator.Configuration {
 		Id:                  dbConfig.ID,
 		Version:             strconv.Itoa(dbConfig.Version),
 		AssetId:             dbConfig.AssetId,
-		Type:                simulator.AssetType(dbConfig.Type),
+		Type:                domain.AssetType(dbConfig.Type),
 		MeasurementInterval: dbConfig.MeasurementInterval,
 		MaxPower:            dbConfig.MaxPower,
 		MinPower:            dbConfig.MinPower,

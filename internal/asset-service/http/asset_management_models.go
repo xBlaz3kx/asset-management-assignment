@@ -1,6 +1,9 @@
 package http
 
-import "asset-measurements-assignment/internal/domain/assets"
+import (
+	"asset-measurements-assignment/internal/domain"
+	"asset-measurements-assignment/internal/domain/assets"
+)
 
 type GetAssetQuery struct {
 	// Filter by asset name
@@ -36,7 +39,7 @@ func (r *CreateAssetRequest) toDomainAsset() assets.Asset {
 	return assets.Asset{
 		Name:        r.Name,
 		Description: r.Description,
-		Type:        assets.AssetType(r.Type),
+		Type:        domain.AssetType(r.Type),
 		Enabled:     r.Enabled,
 	}
 }
@@ -53,7 +56,7 @@ func (r *UpdateAssetRequest) toAsset(assetId string) assets.Asset {
 		ID:          assetId,
 		Name:        r.Name,
 		Description: r.Description,
-		Type:        assets.AssetType(r.Type),
+		Type:        domain.AssetType(r.Type),
 		Enabled:     r.Enabled,
 	}
 }
