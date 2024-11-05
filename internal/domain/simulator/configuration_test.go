@@ -4,6 +4,7 @@ import (
 	"testing"
 	"time"
 
+	"asset-measurements-assignment/internal/domain"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/suite"
 )
@@ -25,7 +26,7 @@ func (s *simulatorTestSuite) TestConfiguration_Validate() {
 				Id:                  uuid.New().String(),
 				AssetId:             assetId,
 				Version:             "1.0.0",
-				Type:                AssetTypeBattery,
+				Type:                domain.AssetTypeBattery,
 				MeasurementInterval: time.Second,
 				MaxPower:            1000,
 				MinPower:            500,
@@ -39,7 +40,7 @@ func (s *simulatorTestSuite) TestConfiguration_Validate() {
 				Id:                  uuid.New().String(),
 				AssetId:             assetId,
 				Version:             "1.0.0",
-				Type:                AssetTypeBattery,
+				Type:                domain.AssetTypeBattery,
 				MeasurementInterval: 0,
 				MaxPower:            1000,
 				MinPower:            500,
@@ -53,7 +54,7 @@ func (s *simulatorTestSuite) TestConfiguration_Validate() {
 				Id:                  uuid.New().String(),
 				AssetId:             assetId,
 				Version:             "1.0.0",
-				Type:                AssetTypeBattery,
+				Type:                domain.AssetTypeBattery,
 				MeasurementInterval: time.Second,
 				MaxPower:            1000,
 				MinPower:            1500,
@@ -95,7 +96,7 @@ func (s *simulatorTestSuite) TestConfiguration_Validate() {
 				Id:                  uuid.New().String(),
 				AssetId:             "",
 				Version:             "1.0.0",
-				Type:                AssetTypeBattery,
+				Type:                domain.AssetTypeBattery,
 				MeasurementInterval: time.Second,
 				MaxPower:            1000,
 				MinPower:            500,

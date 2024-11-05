@@ -108,7 +108,7 @@ func (c *configService) DeleteConfiguration(ctx context.Context, assetId string,
 	}
 
 	// Get previous configuration version for asset
-	configuration, err := c.repository.GetAssetConfiguration(ctx, configurationId)
+	configuration, err := c.repository.GetAssetConfiguration(ctx, assetId)
 	if err != nil {
 		return err
 	}
