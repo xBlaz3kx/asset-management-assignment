@@ -60,19 +60,19 @@ func (c *configService) GetAssetConfiguration(ctx context.Context, assetId strin
 	return c.repository.GetAssetConfiguration(ctx, assetId)
 }
 
-func (c *configService) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) error {
+func (c *configService) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) (*simulator.Configuration, error) {
 	ctx, cancel, logger := c.obs.LogSpan(ctx, "config.service.CreateConfiguration")
 	defer cancel()
 	logger.Info("Creating configuration", zap.Any("configuration", configuration))
 
 	err := configuration.Validate()
 	if err != nil {
-		return errors.ErrConfigValidation
+		return nil, errors.ErrConfigValidation
 	}
 
-	err = c.repository.CreateConfiguration(ctx, configuration)
+	config, err := c.repository.CreateConfiguration(ctx, configuration)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Recreate worker with new configuration after new configuration is created
@@ -81,7 +81,7 @@ func (c *configService) CreateConfiguration(ctx context.Context, configuration s
 		logger.With(zap.Error(err2)).Error("Failed to recreate worker")
 	}
 
-	return nil
+	return config, nil
 }
 
 // recreateWorker removes the worker from the manager and creates a new worker with the new configuration

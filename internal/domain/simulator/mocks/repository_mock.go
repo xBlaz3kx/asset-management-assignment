@@ -23,21 +23,33 @@ func (_m *MockRepository) EXPECT() *MockRepository_Expecter {
 }
 
 // CreateConfiguration provides a mock function with given fields: ctx, configuration
-func (_m *MockRepository) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) error {
+func (_m *MockRepository) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) (*simulator.Configuration, error) {
 	ret := _m.Called(ctx, configuration)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateConfiguration")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, simulator.Configuration) error); ok {
+	var r0 *simulator.Configuration
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, simulator.Configuration) (*simulator.Configuration, error)); ok {
+		return rf(ctx, configuration)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, simulator.Configuration) *simulator.Configuration); ok {
 		r0 = rf(ctx, configuration)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*simulator.Configuration)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, simulator.Configuration) error); ok {
+		r1 = rf(ctx, configuration)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockRepository_CreateConfiguration_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateConfiguration'
@@ -59,12 +71,12 @@ func (_c *MockRepository_CreateConfiguration_Call) Run(run func(ctx context.Cont
 	return _c
 }
 
-func (_c *MockRepository_CreateConfiguration_Call) Return(_a0 error) *MockRepository_CreateConfiguration_Call {
-	_c.Call.Return(_a0)
+func (_c *MockRepository_CreateConfiguration_Call) Return(_a0 *simulator.Configuration, _a1 error) *MockRepository_CreateConfiguration_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockRepository_CreateConfiguration_Call) RunAndReturn(run func(context.Context, simulator.Configuration) error) *MockRepository_CreateConfiguration_Call {
+func (_c *MockRepository_CreateConfiguration_Call) RunAndReturn(run func(context.Context, simulator.Configuration) (*simulator.Configuration, error)) *MockRepository_CreateConfiguration_Call {
 	_c.Call.Return(run)
 	return _c
 }

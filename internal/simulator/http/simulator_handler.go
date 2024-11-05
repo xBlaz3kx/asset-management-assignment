@@ -44,13 +44,13 @@ func (d *SimulatorConfigHandler) CreateAssetConfig(ctx *gin.Context) {
 		return
 	}
 
-	err := d.service.CreateConfiguration(reqCtx, configuration.toDomainConfiguration(assetId))
+	cfg, err := d.service.CreateConfiguration(reqCtx, configuration.toDomainConfiguration(assetId))
 	if err != nil {
 		_ = ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, nil)
+	ctx.JSON(http.StatusCreated, cfg)
 }
 
 func (d *SimulatorConfigHandler) DeleteConfiguration(ctx *gin.Context) {

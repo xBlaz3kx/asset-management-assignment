@@ -118,17 +118,18 @@ func (s *SimulatorConfigurationRepository) GetConfigurations(ctx context.Context
 	return configs, nil
 }
 
-func (s *SimulatorConfigurationRepository) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) error {
+func (s *SimulatorConfigurationRepository) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) (*simulator.Configuration, error) {
 	ctx, cancel := s.obs.Span(ctx, "configuration.repository.CreateConfiguration", zap.Any("configuration", configuration))
 	defer cancel()
 
 	dbConfig := toDBConfiguration(configuration)
 	result := s.db.WithContext(ctx).Create(&dbConfig)
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
 
-	return nil
+	retCfg := toConfiguration(dbConfig)
+	return &retCfg, nil
 }
 
 func (s *SimulatorConfigurationRepository) DeleteConfiguration(ctx context.Context, configurationId string) error {

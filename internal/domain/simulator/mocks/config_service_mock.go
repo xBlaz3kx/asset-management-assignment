@@ -23,21 +23,33 @@ func (_m *MockConfigService) EXPECT() *MockConfigService_Expecter {
 }
 
 // CreateConfiguration provides a mock function with given fields: ctx, configuration
-func (_m *MockConfigService) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) error {
+func (_m *MockConfigService) CreateConfiguration(ctx context.Context, configuration simulator.Configuration) (*simulator.Configuration, error) {
 	ret := _m.Called(ctx, configuration)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateConfiguration")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, simulator.Configuration) error); ok {
+	var r0 *simulator.Configuration
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, simulator.Configuration) (*simulator.Configuration, error)); ok {
+		return rf(ctx, configuration)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, simulator.Configuration) *simulator.Configuration); ok {
 		r0 = rf(ctx, configuration)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*simulator.Configuration)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, simulator.Configuration) error); ok {
+		r1 = rf(ctx, configuration)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockConfigService_CreateConfiguration_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateConfiguration'
@@ -59,27 +71,27 @@ func (_c *MockConfigService_CreateConfiguration_Call) Run(run func(ctx context.C
 	return _c
 }
 
-func (_c *MockConfigService_CreateConfiguration_Call) Return(_a0 error) *MockConfigService_CreateConfiguration_Call {
-	_c.Call.Return(_a0)
+func (_c *MockConfigService_CreateConfiguration_Call) Return(_a0 *simulator.Configuration, _a1 error) *MockConfigService_CreateConfiguration_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockConfigService_CreateConfiguration_Call) RunAndReturn(run func(context.Context, simulator.Configuration) error) *MockConfigService_CreateConfiguration_Call {
+func (_c *MockConfigService_CreateConfiguration_Call) RunAndReturn(run func(context.Context, simulator.Configuration) (*simulator.Configuration, error)) *MockConfigService_CreateConfiguration_Call {
 	_c.Call.Return(run)
 	return _c
 }
 
-// DeleteConfiguration provides a mock function with given fields: ctx, configurationId
-func (_m *MockConfigService) DeleteConfiguration(ctx context.Context, configurationId string) error {
-	ret := _m.Called(ctx, configurationId)
+// DeleteConfiguration provides a mock function with given fields: ctx, assetId, configurationId
+func (_m *MockConfigService) DeleteConfiguration(ctx context.Context, assetId string, configurationId string) error {
+	ret := _m.Called(ctx, assetId, configurationId)
 
 	if len(ret) == 0 {
 		panic("no return value specified for DeleteConfiguration")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string) error); ok {
-		r0 = rf(ctx, configurationId)
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) error); ok {
+		r0 = rf(ctx, assetId, configurationId)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -94,14 +106,15 @@ type MockConfigService_DeleteConfiguration_Call struct {
 
 // DeleteConfiguration is a helper method to define mock.On call
 //   - ctx context.Context
+//   - assetId string
 //   - configurationId string
-func (_e *MockConfigService_Expecter) DeleteConfiguration(ctx interface{}, configurationId interface{}) *MockConfigService_DeleteConfiguration_Call {
-	return &MockConfigService_DeleteConfiguration_Call{Call: _e.mock.On("DeleteConfiguration", ctx, configurationId)}
+func (_e *MockConfigService_Expecter) DeleteConfiguration(ctx interface{}, assetId interface{}, configurationId interface{}) *MockConfigService_DeleteConfiguration_Call {
+	return &MockConfigService_DeleteConfiguration_Call{Call: _e.mock.On("DeleteConfiguration", ctx, assetId, configurationId)}
 }
 
-func (_c *MockConfigService_DeleteConfiguration_Call) Run(run func(ctx context.Context, configurationId string)) *MockConfigService_DeleteConfiguration_Call {
+func (_c *MockConfigService_DeleteConfiguration_Call) Run(run func(ctx context.Context, assetId string, configurationId string)) *MockConfigService_DeleteConfiguration_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(string))
+		run(args[0].(context.Context), args[1].(string), args[2].(string))
 	})
 	return _c
 }
@@ -111,7 +124,7 @@ func (_c *MockConfigService_DeleteConfiguration_Call) Return(_a0 error) *MockCon
 	return _c
 }
 
-func (_c *MockConfigService_DeleteConfiguration_Call) RunAndReturn(run func(context.Context, string) error) *MockConfigService_DeleteConfiguration_Call {
+func (_c *MockConfigService_DeleteConfiguration_Call) RunAndReturn(run func(context.Context, string, string) error) *MockConfigService_DeleteConfiguration_Call {
 	_c.Call.Return(run)
 	return _c
 }
