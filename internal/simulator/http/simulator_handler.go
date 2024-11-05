@@ -55,10 +55,10 @@ func (d *SimulatorConfigHandler) CreateAssetConfig(ctx *gin.Context) {
 
 func (d *SimulatorConfigHandler) DeleteConfiguration(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
-	_ = ctx.Param("assetId")
+	assetId := ctx.Param("assetId")
 	configId := ctx.Param("configId")
 
-	err := d.service.DeleteConfiguration(reqCtx, configId)
+	err := d.service.DeleteConfiguration(reqCtx, assetId, configId)
 	if err != nil {
 		_ = ctx.Error(err)
 		return

@@ -82,6 +82,7 @@ func (c *configService) CreateConfiguration(ctx context.Context, configuration s
 	return nil
 }
 
+// recreateWorker removes the worker from the manager and creates a new worker with the new configuration
 func (c *configService) recreateWorker(configuration simulator.Configuration) error {
 	c.manager.RemoveWorker(configuration.AssetId)
 
@@ -96,7 +97,7 @@ func (c *configService) recreateWorker(configuration simulator.Configuration) er
 	return nil
 }
 
-func (c *configService) DeleteConfiguration(ctx context.Context, configurationId string) error {
+func (c *configService) DeleteConfiguration(ctx context.Context, assetId string, configurationId string) error {
 	ctx, cancel, logger := c.obs.LogSpan(ctx, "config.service.DeleteConfiguration")
 	defer cancel()
 	logger.Info("Deleting configuration", zap.String("configurationId", configurationId))
@@ -106,12 +107,24 @@ func (c *configService) DeleteConfiguration(ctx context.Context, configurationId
 		return err
 	}
 
-	workerErr := c.recreateWorker(simulator.Configuration{AssetId: configurationId})
+	// Get previous configuration version for asset
+	configuration, err := c.repository.GetAssetConfiguration(ctx, configurationId)
+	if err != nil {
+		return err
+	}
+
+	// If there is configuration left for asset, only remove the worker
+	if configuration == nil {
+		c.manager.RemoveWorker(assetId)
+		return nil
+	}
+
+	workerErr := c.recreateWorker(*configuration)
 	if workerErr != nil {
 		logger.With(zap.Error(workerErr)).Error("Failed to recreate worker")
 	}
 
-	return err
+	return nil
 }
 
 func NewConfigService(obs observability.Observability, repository simulator.Repository, manager *asset_simulation.AssetSimulatorManager, publisher asset_simulation.Publisher) simulator.ConfigService {
@@ -125,7 +138,7 @@ func NewConfigService(obs observability.Observability, repository simulator.Repo
 
 func toAssetConfig(configuration simulator.Configuration) asset_simulation.Configuration {
 	cfg := asset_simulation.Configuration{
-		Type:                string(configuration.Type),
+		Type:                configuration.Type,
 		AssetId:             configuration.AssetId,
 		MinPower:            configuration.MinPower,
 		MaxPower:            configuration.MaxPower,
