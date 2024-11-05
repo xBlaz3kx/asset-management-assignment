@@ -140,3 +140,17 @@ func (wm *AssetSimulatorManager) StopAll() {
 
 	wm.wg.Wait()
 }
+
+// RemoveAll stops and removes all workers
+func (wm *AssetSimulatorManager) RemoveAll() {
+	wm.mu.Lock()
+	defer wm.mu.Unlock()
+
+	wm.obs.Log().Info("Stopping and removing all workers", zap.Int("count", len(wm.workers)))
+
+	for _, worker := range wm.workers {
+		wm.RemoveWorker(worker.GetId())
+	}
+
+	wm.wg.Wait()
+}
