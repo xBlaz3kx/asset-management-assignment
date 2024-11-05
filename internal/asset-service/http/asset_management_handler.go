@@ -83,13 +83,13 @@ func (d *AssetGinHandler) CreateAsset(ctx *gin.Context) {
 		return
 	}
 
-	err := d.service.CreateAsset(reqCtx, req.toDomainAsset())
+	asset, err := d.service.CreateAsset(reqCtx, req.toDomainAsset())
 	if err != nil {
 		_ = ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, nil)
+	ctx.JSON(http.StatusCreated, d.toAsset(*asset))
 }
 
 func (d *AssetGinHandler) UpdateAsset(ctx *gin.Context) {
@@ -102,13 +102,13 @@ func (d *AssetGinHandler) UpdateAsset(ctx *gin.Context) {
 		return
 	}
 
-	err := d.service.UpdateAsset(reqCtx, assetId, request.toAsset(assetId))
+	asset, err := d.service.UpdateAsset(reqCtx, assetId, request.toAsset(assetId))
 	if err != nil {
 		_ = ctx.Error(err)
 		return
 	}
 
-	ctx.JSON(http.StatusOK, nil)
+	ctx.JSON(http.StatusOK, d.toAsset(*asset))
 }
 
 func (d *AssetGinHandler) DeleteAsset(ctx *gin.Context) {

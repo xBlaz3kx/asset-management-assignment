@@ -58,7 +58,7 @@ func NewAssetRepository(obs observability.Observability, db *gorm.DB) *AssetRepo
 }
 
 // CreateAsset creates an asset in the database.
-func (a *AssetRepository) CreateAsset(ctx context.Context, asset assets.Asset) error {
+func (a *AssetRepository) CreateAsset(ctx context.Context, asset assets.Asset) (*assets.Asset, error) {
 	ctx, cancel := a.obs.Span(ctx, "asset.repository.CreateAsset", zap.Any("asset", asset))
 	defer cancel()
 
@@ -69,16 +69,17 @@ func (a *AssetRepository) CreateAsset(ctx context.Context, asset assets.Asset) e
 	result := a.db.WithContext(ctx).Create(&dbAsset)
 	switch {
 	case errors2.Is(result.Error, gorm.ErrDuplicatedKey):
-		return errors.ErrAssetAlreadyExists
+		return nil, errors.ErrAssetAlreadyExists
 	case result.Error != nil:
-		return result.Error
+		return nil, result.Error
 	}
 
-	return nil
+	ret := toDomainAsset(dbAsset)
+	return &ret, nil
 }
 
 // UpdateAsset updates an asset in the database.
-func (a *AssetRepository) UpdateAsset(ctx context.Context, assetId string, asset assets.Asset) error {
+func (a *AssetRepository) UpdateAsset(ctx context.Context, assetId string, asset assets.Asset) (*assets.Asset, error) {
 	ctx, cancel := a.obs.Span(ctx, "asset.repository.UpdateAsset", zap.String("assetId", assetId))
 	defer cancel()
 
@@ -89,10 +90,11 @@ func (a *AssetRepository) UpdateAsset(ctx context.Context, assetId string, asset
 	// Update asset in the database
 	result := a.db.WithContext(ctx).Updates(&dbAsset)
 	if result.Error != nil {
-		return result.Error
+		return nil, result.Error
 	}
 
-	return nil
+	ret := toDomainAsset(dbAsset)
+	return &ret, nil
 }
 
 // DeleteAsset deletes an asset from the database.

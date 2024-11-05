@@ -9,8 +9,8 @@ import (
 )
 
 type Service interface {
-	CreateAsset(ctx context.Context, asset Asset) error
-	UpdateAsset(ctx context.Context, assetId string, asset Asset) error
+	CreateAsset(ctx context.Context, asset Asset) (*Asset, error)
+	UpdateAsset(ctx context.Context, assetId string, asset Asset) (*Asset, error)
 	DeleteAsset(ctx context.Context, assetId string) error
 	GetAsset(ctx context.Context, assetId string) (*Asset, error)
 	GetAssets(ctx context.Context, query AssetQuery) ([]Asset, error)
@@ -21,7 +21,7 @@ type service struct {
 	repository Repository
 }
 
-func (s *service) CreateAsset(ctx context.Context, asset Asset) error {
+func (s *service) CreateAsset(ctx context.Context, asset Asset) (*Asset, error) {
 	ctx, cancel, logger := s.obs.LogSpan(ctx, "assets.service.CreateAssetConfig")
 	defer cancel()
 	logger.Info("Creating asset", zap.Any("asset", asset))
@@ -29,13 +29,13 @@ func (s *service) CreateAsset(ctx context.Context, asset Asset) error {
 	// Validate the asset
 	err := asset.Validate()
 	if err != nil {
-		return errors.ErrValidation
+		return nil, errors.ErrValidation
 	}
 
 	return s.repository.CreateAsset(ctx, asset)
 }
 
-func (s *service) UpdateAsset(ctx context.Context, assetId string, asset Asset) error {
+func (s *service) UpdateAsset(ctx context.Context, assetId string, asset Asset) (*Asset, error) {
 	ctx, cancel, logger := s.obs.LogSpan(ctx, "assets.service.UpdateAsset")
 	defer cancel()
 	logger.Info("Updating an asset", zap.Any("assetId", assetId))
@@ -43,7 +43,7 @@ func (s *service) UpdateAsset(ctx context.Context, assetId string, asset Asset) 
 	// Validate the asset
 	err := asset.Validate()
 	if err != nil {
-		return errors.ErrValidation
+		return nil, errors.ErrValidation
 	}
 
 	return s.repository.UpdateAsset(ctx, assetId, asset)

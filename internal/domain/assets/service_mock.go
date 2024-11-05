@@ -22,21 +22,33 @@ func (_m *MockService) EXPECT() *MockService_Expecter {
 }
 
 // CreateAsset provides a mock function with given fields: ctx, asset
-func (_m *MockService) CreateAsset(ctx context.Context, asset Asset) error {
+func (_m *MockService) CreateAsset(ctx context.Context, asset Asset) (*Asset, error) {
 	ret := _m.Called(ctx, asset)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateAsset")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, Asset) error); ok {
+	var r0 *Asset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, Asset) (*Asset, error)); ok {
+		return rf(ctx, asset)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, Asset) *Asset); ok {
 		r0 = rf(ctx, asset)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Asset)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, Asset) error); ok {
+		r1 = rf(ctx, asset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockService_CreateAsset_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'CreateAsset'
@@ -58,12 +70,12 @@ func (_c *MockService_CreateAsset_Call) Run(run func(ctx context.Context, asset 
 	return _c
 }
 
-func (_c *MockService_CreateAsset_Call) Return(_a0 error) *MockService_CreateAsset_Call {
-	_c.Call.Return(_a0)
+func (_c *MockService_CreateAsset_Call) Return(_a0 *Asset, _a1 error) *MockService_CreateAsset_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockService_CreateAsset_Call) RunAndReturn(run func(context.Context, Asset) error) *MockService_CreateAsset_Call {
+func (_c *MockService_CreateAsset_Call) RunAndReturn(run func(context.Context, Asset) (*Asset, error)) *MockService_CreateAsset_Call {
 	_c.Call.Return(run)
 	return _c
 }
@@ -234,21 +246,33 @@ func (_c *MockService_GetAssets_Call) RunAndReturn(run func(context.Context, Ass
 }
 
 // UpdateAsset provides a mock function with given fields: ctx, assetId, asset
-func (_m *MockService) UpdateAsset(ctx context.Context, assetId string, asset Asset) error {
+func (_m *MockService) UpdateAsset(ctx context.Context, assetId string, asset Asset) (*Asset, error) {
 	ret := _m.Called(ctx, assetId, asset)
 
 	if len(ret) == 0 {
 		panic("no return value specified for UpdateAsset")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, Asset) error); ok {
+	var r0 *Asset
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, Asset) (*Asset, error)); ok {
+		return rf(ctx, assetId, asset)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, Asset) *Asset); ok {
 		r0 = rf(ctx, assetId, asset)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*Asset)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, string, Asset) error); ok {
+		r1 = rf(ctx, assetId, asset)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // MockService_UpdateAsset_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateAsset'
@@ -271,12 +295,12 @@ func (_c *MockService_UpdateAsset_Call) Run(run func(ctx context.Context, assetI
 	return _c
 }
 
-func (_c *MockService_UpdateAsset_Call) Return(_a0 error) *MockService_UpdateAsset_Call {
-	_c.Call.Return(_a0)
+func (_c *MockService_UpdateAsset_Call) Return(_a0 *Asset, _a1 error) *MockService_UpdateAsset_Call {
+	_c.Call.Return(_a0, _a1)
 	return _c
 }
 
-func (_c *MockService_UpdateAsset_Call) RunAndReturn(run func(context.Context, string, Asset) error) *MockService_UpdateAsset_Call {
+func (_c *MockService_UpdateAsset_Call) RunAndReturn(run func(context.Context, string, Asset) (*Asset, error)) *MockService_UpdateAsset_Call {
 	_c.Call.Return(run)
 	return _c
 }
