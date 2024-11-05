@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"asset-measurements-assignment/internal/domain/simulator"
+	"asset-measurements-assignment/internal/pkg/errors"
 	"asset-measurements-assignment/internal/simulator/asset_simulation"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.uber.org/zap"
@@ -66,7 +67,7 @@ func (c *configService) CreateConfiguration(ctx context.Context, configuration s
 
 	err := configuration.Validate()
 	if err != nil {
-		return err
+		return errors.ErrConfigValidation
 	}
 
 	err = c.repository.CreateConfiguration(ctx, configuration)
@@ -74,6 +75,7 @@ func (c *configService) CreateConfiguration(ctx context.Context, configuration s
 		return err
 	}
 
+	// Recreate worker with new configuration after new configuration is created
 	err2 := c.recreateWorker(configuration)
 	if err2 != nil {
 		logger.With(zap.Error(err2)).Error("Failed to recreate worker")
@@ -119,6 +121,7 @@ func (c *configService) DeleteConfiguration(ctx context.Context, assetId string,
 		return nil
 	}
 
+	// Recreate a worker with the previous configuration
 	workerErr := c.recreateWorker(*configuration)
 	if workerErr != nil {
 		logger.With(zap.Error(workerErr)).Error("Failed to recreate worker")

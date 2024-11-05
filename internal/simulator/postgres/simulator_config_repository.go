@@ -7,6 +7,7 @@ import (
 
 	"asset-measurements-assignment/internal/domain"
 	"asset-measurements-assignment/internal/domain/simulator"
+	"asset-measurements-assignment/internal/pkg/errors"
 	"github.com/google/uuid"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.uber.org/zap"
@@ -89,7 +90,7 @@ func (s *SimulatorConfigurationRepository) GetAssetConfiguration(ctx context.Con
 	}
 
 	if result.RowsAffected == 0 {
-		return nil, nil
+		return nil, errors.ErrConfigNotFound
 	}
 
 	cfg := toConfiguration(dbConfig)
@@ -135,6 +136,10 @@ func (s *SimulatorConfigurationRepository) DeleteConfiguration(ctx context.Conte
 	result := s.db.WithContext(ctx).Delete(&SimulatorConfiguration{}, "id = ?", configurationId)
 	if result.Error != nil {
 		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.ErrConfigNotFound
 	}
 
 	return nil

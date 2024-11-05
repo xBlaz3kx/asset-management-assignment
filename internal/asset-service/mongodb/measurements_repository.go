@@ -180,7 +180,7 @@ func (m *MeasurementsRepository) GetAssetMeasurementsAveraged(ctx context.Contex
 		return nil, err
 	}
 
-	var dbMeasurements []averagedMeasurement
+	dbMeasurements := []averagedMeasurement{}
 	err = cursor.All(ctx, &dbMeasurements)
 	if err != nil {
 		return nil, err

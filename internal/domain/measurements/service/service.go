@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"asset-measurements-assignment/internal/domain/measurements"
+	"asset-measurements-assignment/internal/pkg/errors"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.uber.org/zap"
 )
@@ -44,7 +45,7 @@ func (m *measurementsService) GetAssetMeasurements(ctx context.Context, assetID 
 	err := timeRange.Validate()
 	if err != nil {
 		logger.With(zap.Error(err)).Error("Invalid time range")
-		return nil, err
+		return nil, errors.ErrTimeRangeViolation
 	}
 
 	measurement, err := m.repository.GetAssetMeasurements(ctx, assetID, timeRange)
@@ -65,6 +66,11 @@ func (m *measurementsService) GetAssetMeasurementsAveraged(ctx context.Context, 
 	)
 	defer cancel()
 	logger.Info("Getting asset measurement averages")
+
+	err := params.Validate()
+	if err != nil {
+		return nil, errors.ErrTimeRangeViolation
+	}
 
 	measurements, err := m.repository.GetAssetMeasurementsAveraged(ctx, assetID, params)
 	if err != nil {

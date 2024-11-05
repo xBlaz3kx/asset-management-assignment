@@ -2,10 +2,12 @@ package postgres
 
 import (
 	"context"
+	errors2 "errors"
 	"time"
 
 	"asset-measurements-assignment/internal/domain"
 	"asset-measurements-assignment/internal/domain/assets"
+	"asset-measurements-assignment/internal/pkg/errors"
 	"github.com/google/uuid"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.uber.org/zap"
@@ -26,6 +28,20 @@ type Asset struct {
 
 func (u *Asset) BeforeCreate(tx *gorm.DB) (err error) {
 	u.ID = uuid.New().String()
+	return
+}
+
+func (u *Asset) BeforeUpdate(tx *gorm.DB) (err error) {
+	// Check if asset even exists
+	res := tx.Find(&Asset{ID: u.ID}).Limit(1)
+	if res.Error != nil {
+		return res.Error
+	}
+
+	if res.RowsAffected == 0 {
+		return gorm.ErrRecordNotFound
+	}
+
 	return
 }
 
@@ -51,7 +67,10 @@ func (a *AssetRepository) CreateAsset(ctx context.Context, asset assets.Asset) e
 
 	// Create asset in the database
 	result := a.db.WithContext(ctx).Create(&dbAsset)
-	if result.Error != nil {
+	switch {
+	case errors2.Is(result.Error, gorm.ErrDuplicatedKey):
+		return errors.ErrAssetAlreadyExists
+	case result.Error != nil:
 		return result.Error
 	}
 
@@ -87,6 +106,10 @@ func (a *AssetRepository) DeleteAsset(ctx context.Context, assetId string) error
 		return result.Error
 	}
 
+	if result.RowsAffected == 0 {
+		return errors.ErrAssetNotFound
+	}
+
 	return nil
 }
 
@@ -100,6 +123,10 @@ func (a *AssetRepository) GetAsset(ctx context.Context, assetId string) (*assets
 	result := a.db.WithContext(ctx).Where("id = ?", assetId).First(&dbAsset)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return nil, errors.ErrAssetNotFound
 	}
 
 	// Convert database asset to domain asset
