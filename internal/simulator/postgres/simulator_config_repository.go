@@ -49,8 +49,10 @@ func (u *SimulatorConfiguration) BeforeCreate(tx *gorm.DB) (err error) {
 	// Check if there is already a configuration for the asset
 
 	prevCfg := &SimulatorConfiguration{}
-	latestConfig := tx.Find(prevCfg, "asset_id = ?", u.AssetId).
-		Order("created_at desc").Limit(1)
+	latestConfig := tx.Unscoped().
+		Order("created_at desc").
+		First(prevCfg, "asset_id = ?", u.AssetId)
+
 	if latestConfig.Error != nil {
 		return latestConfig.Error
 	}
