@@ -85,6 +85,15 @@ domain name:
 - `asset-service.localhost` for the asset service
 - `simulator.localhost` for the simulator service
 
+To test the services, an OpenAPI documentation is available in the repository. I've used Postman to test the services
+locally.
+
+Instructions to import the Postman collection are
+available [here](https://learning.postman.com/docs/designing-and-developing-your-api/importing-an-api/).
+
+Be sure to change the base URL in the Postman collection/request to `http://asset-service.localhost` and
+`http://simulator.localhost` (when performing /assets/{assetId}/config requests) respectively.
+
 ## Notes
 
 What could be improved:
@@ -95,8 +104,6 @@ What could be improved:
 
 Compromises made:
 
-- One of the compromises made in the implementation is omitting API model separation from domain models. Currently,
-  domain model = API model. This is not a good practice in a real-world application, but it was done to save time.
 - Guaranteeing proper unit conversions when generating and storing measurements. I've made the Power model with Unit and
   Measurement fields, but I didn't implement the conversion logic, as the requirements did not specify multiple units.
 
