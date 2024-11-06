@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"asset-measurements-assignment/internal/domain/simulator"
+	"asset-measurements-assignment/internal/domain/simulator/generator"
 	"asset-measurements-assignment/internal/pkg/errors"
 	"asset-measurements-assignment/internal/simulator/asset_simulation"
 	"github.com/xBlaz3kx/DevX/observability"
@@ -30,8 +31,19 @@ func (c *configService) StartWorkersFromDatabaseConfigurations(ctx context.Conte
 
 	// Create workers from configurations
 	for _, config := range configs {
-		configuration := toAssetConfig(config)
-		worker, err := asset_simulation.NewSimpleAssetSimulator(c.obs, configuration, c.publisher)
+		generator, err := generator.GetGeneratorFromConfiguration(config)
+		if err != nil {
+			c.obs.Log().Error("Failed to create generator", zap.Error(err))
+			continue
+		}
+
+		worker, err := asset_simulation.NewRunner(
+			c.obs,
+			config.AssetId,
+			config.MeasurementInterval,
+			generator,
+			c.publisher,
+		)
 		if err != nil {
 			c.obs.Log().Error("Failed to create worker", zap.Error(err))
 			continue
@@ -88,9 +100,20 @@ func (c *configService) CreateConfiguration(ctx context.Context, configuration s
 func (c *configService) recreateWorker(configuration simulator.Configuration) error {
 	c.manager.RemoveWorker(configuration.AssetId)
 
-	cfg := toAssetConfig(configuration)
-	worker, err := asset_simulation.NewSimpleAssetSimulator(c.obs, cfg, c.publisher)
+	gen, err := generator.GetGeneratorFromConfiguration(configuration)
 	if err != nil {
+		return err
+	}
+
+	worker, err := asset_simulation.NewRunner(
+		c.obs,
+		configuration.AssetId,
+		configuration.MeasurementInterval,
+		gen,
+		c.publisher,
+	)
+	if err != nil {
+		c.obs.Log().Error("Failed to create worker", zap.Error(err))
 		return err
 	}
 
@@ -137,16 +160,4 @@ func NewConfigService(obs observability.Observability, repository simulator.Repo
 		manager:    manager,
 		publisher:  publisher,
 	}
-}
-
-func toAssetConfig(configuration simulator.Configuration) asset_simulation.Configuration {
-	cfg := asset_simulation.Configuration{
-		Type:                configuration.Type,
-		AssetId:             configuration.AssetId,
-		MinPower:            configuration.MinPower,
-		MaxPower:            configuration.MaxPower,
-		MaxPowerStep:        configuration.MaxPowerStep,
-		MeasurementInterval: configuration.MeasurementInterval,
-	}
-	return cfg
 }

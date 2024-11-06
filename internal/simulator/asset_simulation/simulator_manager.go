@@ -8,29 +8,31 @@ import (
 	"go.uber.org/zap"
 )
 
-type AssetSimulator interface {
+type Runner interface {
 	Start(ctx context.Context) error
 	Stop() error
 	GetId() string
 	IsRunning() bool
 }
 
+// AssetSimulatorManager manages runners for asset simulation.
+// It supports adding, removing, starting and stopping runners in a thread-safe way at runtime.
 type AssetSimulatorManager struct {
 	wg      sync.WaitGroup
 	mu      sync.Mutex
 	obs     observability.Observability
-	workers map[string]AssetSimulator
+	workers map[string]Runner
 }
 
 func NewAssetSimulatorManager(obs observability.Observability) *AssetSimulatorManager {
 	return &AssetSimulatorManager{
 		obs:     obs,
-		workers: make(map[string]AssetSimulator),
+		workers: make(map[string]Runner),
 	}
 }
 
 // AddAndStartWorker adds a worker to the manager and starts it
-func (wm *AssetSimulatorManager) AddAndStartWorker(ctx context.Context, worker AssetSimulator) {
+func (wm *AssetSimulatorManager) AddAndStartWorker(ctx context.Context, worker Runner) {
 	wm.mu.Lock()
 	defer wm.mu.Unlock()
 	wm.obs.Log().Debug("Adding worker", zap.String("workerId", worker.GetId()))
@@ -59,7 +61,7 @@ func (wm *AssetSimulatorManager) AddAndStartWorker(ctx context.Context, worker A
 }
 
 // AddWorker adds a worker to the manager
-func (wm *AssetSimulatorManager) AddWorker(worker AssetSimulator) {
+func (wm *AssetSimulatorManager) AddWorker(worker Runner) {
 	wm.mu.Lock()
 	defer wm.mu.Unlock()
 	wm.obs.Log().Debug("Adding worker", zap.String("workerId", worker.GetId()))
@@ -86,7 +88,7 @@ func (wm *AssetSimulatorManager) RemoveWorker(workerId string) {
 }
 
 // GetWorker returns a worker by its ID
-func (wm *AssetSimulatorManager) GetWorker(workerId string) (AssetSimulator, bool) {
+func (wm *AssetSimulatorManager) GetWorker(workerId string) (Runner, bool) {
 	wm.mu.Lock()
 	defer wm.mu.Unlock()
 
@@ -95,7 +97,7 @@ func (wm *AssetSimulatorManager) GetWorker(workerId string) (AssetSimulator, boo
 }
 
 // GetWorkers returns all workers
-func (wm *AssetSimulatorManager) GetWorkers() map[string]AssetSimulator {
+func (wm *AssetSimulatorManager) GetWorkers() map[string]Runner {
 	wm.mu.Lock()
 	defer wm.mu.Unlock()
 

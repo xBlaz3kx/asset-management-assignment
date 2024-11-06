@@ -1,5 +1,7 @@
 package domain
 
+import "github.com/pkg/errors"
+
 type EnergyType string
 
 const (
@@ -51,4 +53,29 @@ func (a AssetType) GetEnergyType() EnergyType {
 	default:
 		return ""
 	}
+}
+
+func (e EnergyType) ValidateBounds(min, max float64) error {
+	switch e {
+	case EnergyTypeProducer:
+		// Range should be negative; max must be less than min
+		if min < max {
+			return errors.New("min power should be greater than max power")
+		}
+
+	case EnergyTypeConsumer:
+		// Range should be positive; min must be less than max
+		if max < min {
+			return errors.New("max power should be greater than min power")
+		}
+	case EnergyTypeCombined:
+		// Range can be either positive or negative; min must be less than max
+		if min > max {
+			return errors.New("min power should be less than max power")
+		}
+	default:
+		return errors.New("invalid energy type")
+	}
+
+	return nil
 }

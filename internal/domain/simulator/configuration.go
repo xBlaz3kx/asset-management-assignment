@@ -1,7 +1,6 @@
 package simulator
 
 import (
-	"math"
 	"time"
 
 	"asset-measurements-assignment/internal/domain"
@@ -26,11 +25,6 @@ func (c *Configuration) Validate() error {
 		return errors.New("assetId is required")
 	}
 
-	// Check if minPower is less than maxPower
-	if math.Abs(c.MinPower) > math.Abs(c.MaxPower) {
-		return ErrMinPowerGreaterThanMaxPower
-	}
-
 	// Sanity check the measurement interval
 	if c.MeasurementInterval < time.Millisecond*100 {
 		return errors.New("measurementInterval must be greater than 0")
@@ -39,6 +33,12 @@ func (c *Configuration) Validate() error {
 	// Validate the type
 	if !domain.IsValidAssetType(c.Type) {
 		return errors.New("invalid asset type")
+	}
+
+	// Validate the power bounds
+	err := c.Type.GetEnergyType().ValidateBounds(c.MinPower, c.MaxPower)
+	if err != nil {
+		return err
 	}
 
 	return nil

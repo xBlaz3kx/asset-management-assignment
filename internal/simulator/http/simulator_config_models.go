@@ -21,7 +21,7 @@ type Configuration struct {
 
 // swagger:model
 type CreateConfiguration struct {
-	Type                string        `json:"type" binding:"required,oneof=battery solar wind"`
+	Type                string        `json:"type" binding:"required,oneof=battery solar wind motor hydro_turbine heat_turbine"`
 	MeasurementInterval time.Duration `json:"measurementInterval" binding:"required,gte=100ms"`
 	MaxPower            float64       `json:"maxPower" binding:"required"`
 	MinPower            float64       `json:"minPower" binding:"required"`
