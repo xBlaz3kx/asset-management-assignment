@@ -93,6 +93,10 @@ func (a *AssetRepository) UpdateAsset(ctx context.Context, assetId string, asset
 		return nil, result.Error
 	}
 
+	if result.RowsAffected == 0 {
+		return nil, errors.ErrAssetNotFound
+	}
+
 	ret := toDomainAsset(dbAsset)
 	return &ret, nil
 }
