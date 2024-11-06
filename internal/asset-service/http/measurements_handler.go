@@ -22,6 +22,14 @@ func (d *MeasurementsGinHandler) RegisterRoutes(router *gin.Engine) {
 	rg.GET("", d.GetWithinTimeInterval)
 }
 
+// swagger:route GET /assets/{assetId}/measurements/latest measurements getLatestMeasurement
+// Get the latest measurement for a given asset.
+// ---
+// responses:
+//
+//	200: Measurement
+//	400: errorResponse
+//	500: errorResponse
 func (d *MeasurementsGinHandler) GetLatest(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
@@ -35,6 +43,14 @@ func (d *MeasurementsGinHandler) GetLatest(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, assetMeasurement)
 }
 
+// swagger:route GET /assets/{assetId}/measurements/avg measurements getMeasurementsAvgWithinTimeInterval
+// Get average measurements for a given asset within a time interval.
+// ---
+// responses:
+//
+//	200: []Measurement
+//	400: errorResponse
+//	500: errorResponse
 func (d *MeasurementsGinHandler) GetAvgWithinTimeInterval(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
@@ -54,6 +70,14 @@ func (d *MeasurementsGinHandler) GetAvgWithinTimeInterval(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, assetMeasurementsAveraged)
 }
 
+// swagger:route GET /assets/{assetId}/measurements measurements getMeasurementsWithinTimeInterval
+// Get measurements for a given asset within a time interval.
+// ---
+// responses:
+//
+//	200: []Measurement
+//	400: errorResponse
+//	500:errorResponse
 func (d *MeasurementsGinHandler) GetWithinTimeInterval(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")

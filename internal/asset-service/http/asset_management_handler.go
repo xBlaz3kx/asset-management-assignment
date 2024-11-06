@@ -23,6 +23,14 @@ func (d *AssetGinHandler) RegisterRoutes(router *gin.Engine) {
 	router.DELETE("/assets/:assetId", d.DeleteAsset)
 }
 
+// swagger:route GET /assets/{assetId} asset getAssetById
+// Get asset by id
+// ---
+//
+//	responses:
+//	  200: Asset
+//	  404: errorResponse
+//	  500: errorResponse
 func (d *AssetGinHandler) GetAssetById(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
@@ -36,6 +44,15 @@ func (d *AssetGinHandler) GetAssetById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, d.toAsset(*getAsset))
 }
 
+// swagger:route GET /assets asset getAssets
+// Get assets
+// ---
+//
+//	responses:
+//	  200: []Asset
+//	  400: errorResponse
+//	  404: errorResponse
+//	  500: errorResponse
 func (d *AssetGinHandler) GetAssets(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 
@@ -74,6 +91,20 @@ func (d *AssetGinHandler) toAsset(asset assets.Asset) Asset {
 	}
 }
 
+// swagger:route POST /assets asset createAsset
+// Create asset
+// ---
+//
+//	Parameters:
+//	 + name: createAsset
+//	   in: body
+//	   required: true
+//	   type: CreateAssetRequest
+//
+//	responses:
+//	201: Asset
+//	400: errorResponse
+//	500: errorResponse
 func (d *AssetGinHandler) CreateAsset(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 
@@ -92,6 +123,20 @@ func (d *AssetGinHandler) CreateAsset(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, d.toAsset(*asset))
 }
 
+// swagger:route PUT /assets/{assetId} asset updateAsset
+// Update asset
+// ---
+//
+//	Parameters:
+//	 + name: updateAsset
+//	   in: body
+//	   required: true
+//	   type: UpdateAssetRequest
+//	responses:
+//	 200: Asset
+//	 400: errorResponse
+//	 404: errorResponse
+//	 500: errorResponse
 func (d *AssetGinHandler) UpdateAsset(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
@@ -111,6 +156,14 @@ func (d *AssetGinHandler) UpdateAsset(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, d.toAsset(*asset))
 }
 
+// swagger:route DELETE /assets/{assetId} asset deleteAsset
+// Delete an asset
+// ---
+//
+//	responses:
+//	 204: Asset
+//	 404: errorResponse
+//	 500: errorResponse
 func (d *AssetGinHandler) DeleteAsset(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")

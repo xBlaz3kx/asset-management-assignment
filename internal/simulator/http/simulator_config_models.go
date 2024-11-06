@@ -7,6 +7,7 @@ import (
 	"asset-measurements-assignment/internal/domain/simulator"
 )
 
+// swagger:model
 type Configuration struct {
 	Id                  string        `json:"id"`
 	AssetId             string        `json:"assetId"`
@@ -18,6 +19,7 @@ type Configuration struct {
 	MaxPowerStep        float64       `json:"maxPowerStep"`
 }
 
+// swagger:model
 type CreateConfiguration struct {
 	Type                string        `json:"type" binding:"required,oneof=battery solar wind"`
 	MeasurementInterval time.Duration `json:"measurementInterval" binding:"required,gte=100ms"`

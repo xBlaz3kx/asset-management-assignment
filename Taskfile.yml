@@ -1,0 +1,10 @@
+version: '3'
+
+tasks:
+  generate-spec:
+    silent: true
+    cmds:
+      - SWAGGER_GENERATE_EXTENSION=false swagger generate spec -m -o ./openapi.yaml #--exclude-deps
+      - |  # Convert the 2.0 version to 3.0
+        wget --method=POST --header='Content-Type: application/yaml' --header='accept: application/yaml' --body-file=./openapi.yaml -O ./gen.openapi.yaml https://converter.swagger.io/api/convert
+      - rm ./openapi.yaml

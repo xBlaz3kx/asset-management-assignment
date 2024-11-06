@@ -1,0 +1,557 @@
+openapi: 3.0.1
+info:
+  description: Asset + simulator API
+  version: 1.0.0
+servers:
+- url: http://localhost/
+paths:
+  /assets:
+    get:
+      tags:
+      - asset
+      description: Get assets
+      operationId: getAssets
+      parameters:
+      - name: Enabled
+        in: query
+        description: Filter by asset enabled status
+        schema:
+          type: boolean
+      - name: Type
+        in: query
+        description: Filter by asset type
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Asset
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Asset'
+        "400":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "404":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      tags:
+      - asset
+      description: Create asset
+      operationId: createAsset
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateAssetRequest'
+        required: true
+      responses:
+        "201":
+          description: Asset
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Asset'
+        "400":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+      x-codegen-request-body-name: createAsset
+  /assets/{assetId}:
+    get:
+      tags:
+      - asset
+      description: Get asset by id
+      operationId: getAssetById
+      responses:
+        "200":
+          description: Asset
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Asset'
+        "404":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    put:
+      tags:
+      - asset
+      description: Update asset
+      operationId: updateAsset
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/UpdateAssetRequest'
+        required: true
+      responses:
+        "200":
+          description: Asset
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Asset'
+        "400":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "404":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+      x-codegen-request-body-name: updateAsset
+    delete:
+      tags:
+      - asset
+      description: Delete an asset
+      operationId: deleteAsset
+      responses:
+        "204":
+          description: Asset
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Asset'
+        "404":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /assets/{assetId}/config:
+    get:
+      tags:
+      - simulator
+      description: Get asset configuration by asset id
+      operationId: getAssetConfig
+      responses:
+        "204":
+          description: Configuration
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Configuration'
+        "400":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "404":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        default:
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+    post:
+      tags:
+      - simulator
+      description: Create asset configuration
+      operationId: createAssetConfig
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/CreateConfiguration'
+        required: true
+      responses:
+        "204":
+          description: Configuration
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Configuration'
+        "400":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "404":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+      x-codegen-request-body-name: configurationRequest
+  /assets/{assetId}/config/{configId}:
+    delete:
+      tags:
+      - simulator
+      description: Delete asset configuration
+      operationId: deleteConfiguration
+      responses:
+        "204":
+          description: emptyResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/emptyResponse'
+        "404":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /assets/{assetId}/measurements:
+    get:
+      tags:
+      - measurements
+      summary: Get measurements for a given asset within a time interval.
+      operationId: getMeasurementsWithinTimeInterval
+      parameters:
+      - name: From
+        in: query
+        schema:
+          type: string
+          format: date-time
+      - name: To
+        in: query
+        schema:
+          type: string
+          format: date-time
+      responses:
+        "200":
+          description: Measurement
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Measurement'
+        "400":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /assets/{assetId}/measurements/avg:
+    get:
+      tags:
+      - measurements
+      summary: Get average measurements for a given asset within a time interval.
+      operationId: getMeasurementsAvgWithinTimeInterval
+      parameters:
+      - name: From
+        in: query
+        schema:
+          type: string
+          format: date-time
+      - name: To
+        in: query
+        schema:
+          type: string
+          format: date-time
+      - name: GroupBy
+        in: query
+        schema:
+          type: string
+      - name: Sort
+        in: query
+        schema:
+          type: string
+      responses:
+        "200":
+          description: Measurement
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Measurement'
+        "400":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /assets/{assetId}/measurements/latest:
+    get:
+      tags:
+      - measurements
+      summary: Get the latest measurement for a given asset.
+      operationId: getLatestMeasurement
+      responses:
+        "200":
+          description: Measurement
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/Measurement'
+        "400":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        "500":
+          description: errorResponse
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+  /healthz:
+    get:
+      tags:
+      - healthCheck
+      - internal
+      summary: Perform healthcheck on the service.
+      operationId: livelinessCheck
+      responses:
+        "200":
+          description: emptyResponse
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/emptyResponse'
+        "503":
+          description: errorResponse
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorResponse'
+        default:
+          description: emptyResponse
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/emptyResponse'
+components:
+  schemas:
+    Asset:
+      type: object
+      properties:
+        description:
+          type: string
+        enabled:
+          type: boolean
+        id:
+          type: string
+        name:
+          type: string
+        type:
+          type: string
+    Configuration:
+      type: object
+      properties:
+        assetId:
+          type: string
+        id:
+          type: string
+        maxPower:
+          type: number
+          format: double
+        maxPowerStep:
+          type: number
+          format: double
+        measurementInterval:
+          $ref: '#/components/schemas/Duration'
+        minPower:
+          type: number
+          format: double
+        type:
+          type: string
+        version:
+          type: string
+    CreateAssetRequest:
+      required:
+      - name
+      - type
+      type: object
+      properties:
+        description:
+          maxLength: 100
+          minLength: 4
+          type: string
+          description: Description of the asset
+        enabled:
+          type: boolean
+          description: Enabled status of the asset
+        name:
+          maxLength: 100
+          minLength: 4
+          type: string
+          description: Name of the asset
+        type:
+          type: string
+          description: Type of the asset
+    CreateConfiguration:
+      type: object
+      properties:
+        maxPower:
+          type: number
+          format: double
+        maxPowerStep:
+          type: number
+          format: double
+        measurementInterval:
+          $ref: '#/components/schemas/Duration'
+        minPower:
+          type: number
+          format: double
+        type:
+          type: string
+    Duration:
+      type: integer
+      description: |-
+        A Duration represents the elapsed time between two instants
+        as an int64 nanosecond count. The representation limits the
+        largest representable duration to approximately 290 years.
+      format: int64
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        message:
+          type: string
+        status:
+          type: string
+    Measurement:
+      type: object
+      properties:
+        power:
+          $ref: '#/components/schemas/Power'
+        stateOfEnergy:
+          type: number
+          description: StateOfEnergy represents the current state of energy of the
+            asset.
+          format: double
+        timestamp:
+          type: string
+          format: date-time
+    Power:
+      type: object
+      properties:
+        unit:
+          type: string
+          description: Unit represents the unit of the power.
+        value:
+          type: number
+          description: Value represents the value of the power.
+          format: double
+    UpdateAssetRequest:
+      required:
+      - name
+      - type
+      type: object
+      properties:
+        description:
+          maxLength: 100
+          minLength: 4
+          type: string
+          description: Description of the asset
+        enabled:
+          type: boolean
+          description: Enabled status of the asset
+        name:
+          maxLength: 100
+          minLength: 4
+          type: string
+          description: Name of the asset
+        type:
+          type: string
+          description: Type of the asset
+    authError:
+      type: object
+      properties:
+        error:
+          $ref: '#/components/schemas/Error'
+    emptyResponse:
+      type: object
+    errorResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int64
+        description:
+          type: string
+        error:
+          type: string
+x-original-swagger-version: "2.0"

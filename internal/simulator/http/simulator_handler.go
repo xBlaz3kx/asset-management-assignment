@@ -21,6 +21,16 @@ func (d *SimulatorConfigHandler) RegisterRoutes(router *gin.Engine) {
 	router.DELETE("/assets/:assetId/config/:configId", d.DeleteConfiguration)
 }
 
+// swagger:route GET /assets/{assetId}/config simulator getAssetConfig
+// Get asset configuration by asset id
+// ---
+//
+//	responses:
+//	  204: Configuration
+//	  400: errorResponse
+//	  404: errorResponse
+//	  500: errorResponse
+//	  default: errorResponse
 func (d *SimulatorConfigHandler) GetCurrentAssetConfig(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
@@ -34,6 +44,21 @@ func (d *SimulatorConfigHandler) GetCurrentAssetConfig(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, getAsset)
 }
 
+// swagger:route POST /assets/{assetId}/config simulator createAssetConfig
+// Create asset configuration
+// ---
+//
+//	Parameters:
+//	 + name: configurationRequest
+//	   in: body
+//	   required: true
+//	   type: CreateConfiguration
+//
+//	 responses:
+//	   204: Configuration
+//	   400: errorResponse
+//	   404: errorResponse
+//	   500: errorResponse
 func (d *SimulatorConfigHandler) CreateAssetConfig(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")
@@ -53,6 +78,14 @@ func (d *SimulatorConfigHandler) CreateAssetConfig(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, cfg)
 }
 
+// swagger:route DELETE /assets/{assetId}/config/{configId} simulator deleteConfiguration
+// Delete asset configuration
+// ---
+//
+//	responses:
+//	  204: emptyResponse
+//	  404: errorResponse
+//	  500: errorResponse
 func (d *SimulatorConfigHandler) DeleteConfiguration(ctx *gin.Context) {
 	reqCtx := ctx.Request.Context()
 	assetId := ctx.Param("assetId")

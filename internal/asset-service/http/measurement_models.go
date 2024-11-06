@@ -6,17 +6,28 @@ import (
 	"asset-measurements-assignment/internal/domain/measurements"
 )
 
+// swagger:model
 type Measurement struct {
-	Timestamp     time.Time `json:"timestamp"`
-	Power         Power     `json:"power"`
-	StateOfEnergy float64   `json:"stateOfEnergy"`
+	// swagger:type string
+	Timestamp time.Time `json:"timestamp"`
+
+	// Power represents the power of the asset.
+	Power Power `json:"power"`
+
+	// StateOfEnergy represents the current state of energy of the asset.
+	StateOfEnergy float64 `json:"stateOfEnergy"`
 }
 
+// swagger:model
 type Power struct {
+	// Value represents the value of the power.
 	Value float64 `json:"value"`
-	Unit  string  `json:"unit"`
+
+	// Unit represents the unit of the power.
+	Unit string `json:"unit"`
 }
 
+// swagger:parameters getMeasurementsAvgWithinTimeInterval
 type AssetMeasurementAveragedParams struct {
 	TimeRange
 	GroupBy string `form:"groupBy" binding:"required,oneof=minute hour 15min"`
@@ -31,6 +42,7 @@ func (a *AssetMeasurementAveragedParams) toDomainModel() measurements.AssetMeasu
 	}
 }
 
+// swagger:parameters getMeasurementsWithinTimeInterval
 type TimeRange struct {
 	From *time.Time `form:"from" binding:"required"`
 	To   *time.Time `form:"to" binding:"required"`
