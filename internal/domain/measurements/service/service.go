@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 
+	"asset-measurements-assignment/internal/domain/assets"
 	"asset-measurements-assignment/internal/domain/measurements"
 	"asset-measurements-assignment/internal/pkg/errors"
 	"github.com/xBlaz3kx/DevX/observability"
@@ -10,14 +11,16 @@ import (
 )
 
 type measurementsService struct {
-	obs        observability.Observability
-	repository measurements.Repository
+	obs             observability.Observability
+	repository      measurements.Repository
+	assetRepository assets.Repository
 }
 
-func NewMeasurementsService(obs observability.Observability, repository measurements.Repository) measurements.Service {
+func NewMeasurementsService(obs observability.Observability, assetRepository assets.Repository, repository measurements.Repository) measurements.Service {
 	return &measurementsService{
-		obs:        obs,
-		repository: repository,
+		obs:             obs,
+		repository:      repository,
+		assetRepository: assetRepository,
 	}
 }
 
@@ -26,6 +29,13 @@ func (m *measurementsService) GetLatestAssetMeasurement(ctx context.Context, ass
 	ctx, cancel, logger := m.obs.LogSpan(ctx, "measurements.service.GetLatestAssetMeasurement", zap.String("assetId", assetID))
 	defer cancel()
 	logger.Info("Getting latest asset measurement")
+
+	// Verify if asset exists
+	_, err := m.assetRepository.GetAsset(ctx, assetID)
+	if err != nil {
+		logger.With(zap.Error(err)).Error("Failed to get asset")
+		return nil, err
+	}
 
 	measurement, err := m.repository.GetLatestAssetMeasurement(ctx, assetID)
 	if err != nil {
@@ -46,6 +56,13 @@ func (m *measurementsService) GetAssetMeasurements(ctx context.Context, assetID 
 	if err != nil {
 		logger.With(zap.Error(err)).Error("Invalid time range")
 		return nil, errors.ErrTimeRangeViolation
+	}
+
+	// Verify if asset exists
+	_, err = m.assetRepository.GetAsset(ctx, assetID)
+	if err != nil {
+		logger.With(zap.Error(err)).Error("Failed to get asset")
+		return nil, err
 	}
 
 	measurement, err := m.repository.GetAssetMeasurements(ctx, assetID, timeRange)
@@ -70,6 +87,12 @@ func (m *measurementsService) GetAssetMeasurementsAveraged(ctx context.Context, 
 	err := params.Validate()
 	if err != nil {
 		return nil, errors.ErrTimeRangeViolation
+	}
+
+	// Verify if asset exists
+	_, err = m.assetRepository.GetAsset(ctx, assetID)
+	if err != nil {
+		return nil, err
 	}
 
 	measurements, err := m.repository.GetAssetMeasurementsAveraged(ctx, assetID, params)

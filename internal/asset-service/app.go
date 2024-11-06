@@ -117,7 +117,7 @@ func Run(ctx context.Context, cfg Config) error {
 	assetService := assets.NewService(obs, assetRepository)
 
 	// Create measurements service
-	measurementsService := measurements.NewMeasurementsService(obs, measurementsRepository)
+	measurementsService := measurements.NewMeasurementsService(obs, assetRepository, measurementsRepository)
 
 	// Create HTTP server
 	httpServer := devxHttp.NewServer(cfg.Http, obs)
