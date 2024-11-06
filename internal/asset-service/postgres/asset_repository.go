@@ -107,7 +107,7 @@ func (a *AssetRepository) DeleteAsset(ctx context.Context, assetId string) error
 	defer cancel()
 
 	// Soft delete asset from the database
-	result := a.db.WithContext(ctx).Delete(&Asset{}, assetId)
+	result := a.db.WithContext(ctx).Delete(&Asset{ID: assetId})
 	if result.Error != nil {
 		return result.Error
 	}
