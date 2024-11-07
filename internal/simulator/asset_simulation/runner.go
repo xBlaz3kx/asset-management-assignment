@@ -131,6 +131,12 @@ func (s *runner) IsRunning() bool {
 }
 
 func (s *runner) Stop() error {
+	if !s.isRunning {
+		return errors.New("worker is already stopped")
+	}
+
+	// Stop the worker
+	s.stopChan <- true
 	close(s.stopChan)
 	return nil
 }
