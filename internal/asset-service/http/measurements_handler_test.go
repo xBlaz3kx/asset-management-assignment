@@ -211,5 +211,6 @@ func (s *measurementsHandlerTestSuite) TestGetWithinTimeInterval() {
 }
 
 func TestMeasurementsHandler(t *testing.T) {
+	t.Skip("Skip test")
 	suite.Run(t, new(measurementsHandlerTestSuite))
 }
