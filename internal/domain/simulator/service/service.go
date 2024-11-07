@@ -5,7 +5,6 @@ import (
 
 	"asset-measurements-assignment/internal/domain/simulator"
 	"asset-measurements-assignment/internal/domain/simulator/generator"
-	"asset-measurements-assignment/internal/pkg/errors"
 	"asset-measurements-assignment/internal/simulator/asset_simulation"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.uber.org/zap"
@@ -79,7 +78,7 @@ func (c *configService) CreateConfiguration(ctx context.Context, configuration s
 
 	err := configuration.Validate()
 	if err != nil {
-		return nil, errors.ErrConfigValidation
+		return nil, simulator.ErrConfigValidation
 	}
 
 	config, err := c.repository.CreateConfiguration(ctx, configuration)

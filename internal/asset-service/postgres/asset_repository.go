@@ -7,7 +7,6 @@ import (
 
 	"asset-measurements-assignment/internal/domain"
 	"asset-measurements-assignment/internal/domain/assets"
-	"asset-measurements-assignment/internal/pkg/errors"
 	"github.com/google/uuid"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.uber.org/zap"
@@ -69,7 +68,7 @@ func (a *AssetRepository) CreateAsset(ctx context.Context, asset assets.Asset) (
 	result := a.db.WithContext(ctx).Create(&dbAsset)
 	switch {
 	case errors2.Is(result.Error, gorm.ErrDuplicatedKey):
-		return nil, errors.ErrAssetAlreadyExists
+		return nil, assets.ErrAssetAlreadyExists
 	case result.Error != nil:
 		return nil, result.Error
 	}
@@ -113,7 +112,7 @@ func (a *AssetRepository) DeleteAsset(ctx context.Context, assetId string) error
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.ErrAssetNotFound
+		return assets.ErrAssetNotFound
 	}
 
 	return nil
@@ -132,7 +131,7 @@ func (a *AssetRepository) GetAsset(ctx context.Context, assetId string) (*assets
 	}
 
 	if result.RowsAffected == 0 {
-		return nil, errors.ErrAssetNotFound
+		return nil, assets.ErrAssetNotFound
 	}
 
 	// Convert database asset to domain asset

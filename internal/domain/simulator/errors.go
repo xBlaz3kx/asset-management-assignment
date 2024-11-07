@@ -1,4 +1,4 @@
-package errors
+package simulator
 
 import (
 	"net/http"

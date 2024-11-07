@@ -1,4 +1,4 @@
-package errors
+package assets
 
 import (
 	"net/http"

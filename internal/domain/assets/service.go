@@ -3,7 +3,6 @@ package assets
 import (
 	"context"
 
-	"asset-measurements-assignment/internal/pkg/errors"
 	"github.com/xBlaz3kx/DevX/observability"
 	"go.uber.org/zap"
 )
@@ -29,7 +28,7 @@ func (s *service) CreateAsset(ctx context.Context, asset Asset) (*Asset, error) 
 	// Validate the asset
 	err := asset.Validate()
 	if err != nil {
-		return nil, errors.ErrValidation
+		return nil, ErrValidation
 	}
 
 	return s.repository.CreateAsset(ctx, asset)
@@ -43,7 +42,7 @@ func (s *service) UpdateAsset(ctx context.Context, assetId string, asset Asset) 
 	// Validate the asset
 	err := asset.Validate()
 	if err != nil {
-		return nil, errors.ErrValidation
+		return nil, ErrValidation
 	}
 
 	return s.repository.UpdateAsset(ctx, assetId, asset)
