@@ -97,7 +97,7 @@ func (c *configService) CreateConfiguration(ctx context.Context, configuration s
 
 // recreateWorker removes the worker from the manager and creates a new worker with the new configuration
 func (c *configService) recreateWorker(configuration simulator.Configuration) error {
-	c.manager.RemoveWorker(configuration.AssetId)
+	_ = c.manager.RemoveWorker(configuration.AssetId)
 
 	gen, err := generator.GetGeneratorFromConfiguration(configuration)
 	if err != nil {
@@ -117,7 +117,11 @@ func (c *configService) recreateWorker(configuration simulator.Configuration) er
 	}
 
 	// Add and start worker from the new configuration
-	c.manager.AddAndStartWorker(context.Background(), worker)
+	workerErr := c.manager.AddAndStartWorker(context.Background(), worker)
+	if workerErr != nil {
+		c.obs.Log().Error("Failed to add and start worker", zap.Error(workerErr))
+	}
+
 	return nil
 }
 
@@ -139,7 +143,10 @@ func (c *configService) DeleteConfiguration(ctx context.Context, assetId string,
 
 	// If there is configuration left for asset, only remove the worker
 	if configuration == nil {
-		c.manager.RemoveWorker(assetId)
+		workerErr := c.manager.RemoveWorker(assetId)
+		if workerErr != nil {
+			logger.With(zap.Error(workerErr)).Error("Failed to remove worker")
+		}
 		return nil
 	}
 
