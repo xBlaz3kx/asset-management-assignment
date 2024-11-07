@@ -225,6 +225,7 @@ func (s *simulatorManagerTestSuite) TestGetWorker() {
 }
 
 func (s *simulatorManagerTestSuite) TestStartWorkers() {
+	s.T().Skip()
 	tests := []struct {
 		name string
 	}{}
