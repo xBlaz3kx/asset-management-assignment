@@ -9,11 +9,11 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type simulatorTestSuite struct {
+type configurationTestSuite struct {
 	suite.Suite
 }
 
-func (s *simulatorTestSuite) TestConfiguration_Validate() {
+func (s *configurationTestSuite) TestConfiguration_Validate() {
 	assetId := uuid.New().String()
 	tests := []struct {
 		name string
@@ -118,6 +118,6 @@ func (s *simulatorTestSuite) TestConfiguration_Validate() {
 	}
 }
 
-func TestSimulator(t *testing.T) {
-	suite.Run(t, new(simulatorTestSuite))
+func TestConfiguration(t *testing.T) {
+	suite.Run(t, new(configurationTestSuite))
 }

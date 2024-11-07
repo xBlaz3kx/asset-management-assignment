@@ -7,8 +7,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-var ErrMinPowerGreaterThanMaxPower = errors.New("minPower is greater than maxPower")
-
 type Configuration struct {
 	Id                  string           `json:"id"`
 	AssetId             string           `json:"assetId"`
